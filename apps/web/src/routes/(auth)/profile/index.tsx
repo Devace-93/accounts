@@ -10,7 +10,7 @@ import { ALL_PROVIDERS, PROVIDER_NAMES, ProviderIcon } from "../../../components
 import { UnverifiedBanner } from "../../../components/unverified-banner";
 import { tr, trError, useI18n, type I18nState } from "../../../i18n";
 
-const HANDLE_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/;
+const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 const MIN_PASSWORD = 8;
 
 function errorText(i18n: I18nState, e: unknown): string {

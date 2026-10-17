@@ -24,8 +24,8 @@ Goal: one identity for every app under `3m4.net`. Decisions taken on
 | 2 | accounts service: dbcore, API (password, sessions, JWKS, verify, magic link, profile, avatars), worker, hosted pages, `session.js`, relying-party packages | done locally (2026-10-16): 40 pytest + 21 Playwright green on `make up` (:8085) |
 | 3 | OAuth: Google, GitHub, Microsoft, Discord (app registrations by Enrique, see `deploy/PRODUCTION.md`) | code done, untested against real providers until client ids exist |
 | 4 | Production: DNS `accounts`, Caddy block, Resend domain verification, first deploy | pending |
-| 5 | Migrate apps, one PR each, in order: 3m4 shortener → exp → retro → metrics → smart-docs → bubbles. Each: verify the JWT, provision the local user from the claims, drop the local password tables, redirect `/login` + `/signup`, avatar + handle in the nav, global logout | pending |
-| 6 | Static sites: `session.js` on info (login / logout / signup section), kinegram and bubbles (optional login, leaderboard with the shared identity) | pending |
+| 5 | Migrate apps, one PR each, in order: 3m4 shortener → exp → retro → metrics → smart-docs → bubbles. Each: verify the JWT, provision the local user from the claims, drop the local password tables, redirect `/login` + `/signup`, avatar + handle in the nav, global logout | done locally (2026-10-16): every repo's working tree migrated and green against the local accounts stack (3m4 27 e2e, exp 51, retro 28, metrics 15, smart-docs 17 pytest, bubbles 36 pytest); commits + PRs by Enrique |
+| 6 | Static sites: `session.js` on info (login / logout / signup section), kinegram and bubbles (optional login, leaderboard with the shared identity) | done locally (2026-10-16): info committed on `worktree-login-options-standards`, kinegram + bubbles in their working trees |
 | 7 | Later: Facebook login, account deletion / data export, passkeys | backlog |
 
 ## Non-goals (phase 1)

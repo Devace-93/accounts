@@ -10,7 +10,7 @@ import { ProviderButtons } from "../../../components/provider-buttons";
 import { tr, trError, useI18n } from "../../../i18n";
 
 /** CONTRACT.md → Objects → handle. */
-export const HANDLE_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/;
+export const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 const MIN_PASSWORD = 8;
 
 /** Default handle from an email's local part: lowercase slug, ≤ 32 chars. */
@@ -153,7 +153,7 @@ export default component$(() => {
               spellcheck={false}
               minLength={3}
               maxLength={32}
-              pattern="[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?"
+              pattern="[a-z0-9][a-z0-9\-]{1,30}[a-z0-9]"
               aria-invalid={handleBad.value ? "true" : undefined}
               aria-describedby="handle-hint"
               value={state.handle}

@@ -58,6 +58,10 @@ services:
       redis: { condition: service_healthy }
       migrate: { condition: service_completed_successfully }
     expose: ["5000"]
+    # Also on the shared `edge` network (created by `make up`), so the other
+    # 3m4 stacks running locally can fetch the JWKS at
+    # http://accounts-api-1:5000/.well-known/jwks.json, exactly as in production.
+    networks: [default, edge]
     restart: unless-stopped
 
   # Outbox consumer: delivers the mails the API queued (same image as the API).
@@ -103,6 +107,10 @@ services:
       - caddyconfig:/config
     depends_on: [api, web]
     restart: unless-stopped
+
+networks:
+  edge:
+    external: true
 
 volumes:
   pgdata:

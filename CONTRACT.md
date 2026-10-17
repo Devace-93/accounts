@@ -36,7 +36,11 @@ Compose project name `accounts`. Frontend tooling is Bun. Brand colour: Tailwind
 - Every relying app verifies `3m4_session` **locally** (no call to accounts)
   with the public keys from `GET https://accounts.3m4.net/.well-known/jwks.json`
   (cache 10 min; refetch once on an unknown `kid`). The same JWT is also
-  accepted as `Authorization: Bearer <jwt>` for non-browser clients.
+  accepted as `Authorization: Bearer <jwt>` for non-browser clients. When
+  both are present the **explicit bearer wins** over the ambient cookie (a
+  client holding a cookie for one identity can still act as another on
+  purpose); an app's own API keys sent as bearers are recognised by their
+  prefix and never mistaken for a session.
 - JWT claims:
 
   ```json
@@ -230,11 +234,27 @@ Chrome: the same language picker (34 locales, `3m4.lang`), theme toggle
 ## Relying apps (how 3m4 / exp / retro / metrics / smart-docs / bubbles plug in)
 
 - Verify the JWT (cookie `3m4_session` or bearer) with the JWKS; accept only
-  `iss` = `ACCOUNTS_URL`, `aud` = `3m4`. Reference implementations live in
+  `iss` = `ACCOUNTS_URL`, `aud` = `3m4`. Two env vars per app:
+  `ACCOUNTS_URL` (public origin: issuer, redirects, the browser's session
+  calls; `https://accounts.3m4.net` / `http://localhost:8085`) and
+  `ACCOUNTS_INTERNAL_URL` (where the app's containers fetch the JWKS; default
+  = `ACCOUNTS_URL`; on the shared `edge` docker network, locally and in
+  production alike, `http://accounts-api-1:5000`). The frontend gets
+  `VITE_ACCOUNTS_URL` = `ACCOUNTS_URL` at build time. Reference implementations live in
   `packages/relying-party/python/m4session.py` (framework-agnostic verifier +
   Flask decorator `@require_session` → `g.identity`) and
   `packages/relying-party/ts/` (fetch wrapper that refreshes once on
   `session_expired`, plus `getSession()`).
+- Session-less requests to protected routes answer `401 no_session`; the
+  client redirects to `${ACCOUNTS_URL}/login?return_to=`. Expired access
+  tokens answer `401 session_expired`; the client POSTs
+  `${ACCOUNTS_URL}/api/session/refresh` (credentials included) once and
+  retries. `/auth/me`-style endpoints stay reachable for unverified users so
+  the app can render its own "verify your email" banner; everything else is
+  `403 email_unverified` until the claim flips.
+- Local passwords, refresh tokens and the `register` / `login` / `refresh`
+  / `logout` endpoints are removed from every app. Existing users and their
+  data were dropped (decision 2026-10-16: no real users yet).
 - First time a `sub` is seen: create the local user row (`identity_id = sub`,
   email, handle, name, avatar_url copied from the claims) plus whatever the
   app needs (workspace, membership). Keep those columns fresh from the claims

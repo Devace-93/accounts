@@ -100,13 +100,14 @@ def attach(resp: Response, access: str, refresh: str) -> Response:
 # Reading sessions
 # --------------------------------------------------------------------------- #
 def current_token() -> str | None:
-    token = request.cookies.get(SESSION_COOKIE)
-    if token:
-        return token
+    # An explicit bearer header wins over the ambient cookie, so a client that
+    # holds a cookie for one identity can still act as another on purpose.
     header = request.headers.get("Authorization", "")
     if header.startswith("Bearer "):
-        return header[len("Bearer "):].strip() or None
-    return None
+        bearer = header[len("Bearer ") :].strip()
+        if bearer:
+            return bearer
+    return request.cookies.get(SESSION_COOKIE) or None
 
 
 def load_session(claims: dict) -> tuple[User, Session]:

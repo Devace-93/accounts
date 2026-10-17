@@ -42,7 +42,7 @@ jobs:
           grep -v -i 'secret\|key=' .env
 
       - name: Start the stack
-        run: docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
+        run: docker network create edge && docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
 
       - name: Wait for the API
         run: |

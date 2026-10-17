@@ -63,15 +63,10 @@ included) besides verifying the JWT.
    	@widget path /session.js
    	handle @widget {
    		header {
-
    			Cache-Control "public, max-age=300"
-
    			Access-Control-Allow-Origin "*"
-
    			# defer: replace the upstream Cache-Control instead of adding a second one
-
    			defer
-
    		}
    		reverse_proxy accounts-web-1:3000
    	}

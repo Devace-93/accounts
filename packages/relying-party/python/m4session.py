@@ -125,13 +125,14 @@ def verify(token: str, *, jwks_url: str, issuer: str, audience: str = "3m4", cac
 
 
 def _token_from_flask_request(request) -> str | None:
-    token = request.cookies.get(COOKIE_NAME)
-    if token:
-        return token
+    # An explicit bearer header wins over the ambient cookie, so a client that
+    # holds a cookie for one identity can still act as another on purpose.
     header = request.headers.get("Authorization", "")
     if header.startswith("Bearer "):
-        return header[len("Bearer "):].strip() or None
-    return None
+        bearer = header[len("Bearer ") :].strip()
+        if bearer:
+            return bearer
+    return request.cookies.get(COOKIE_NAME) or None
 
 
 def _default_on_error(status: int, code: str, message: str) -> Exception:
