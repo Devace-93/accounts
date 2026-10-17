@@ -1,0 +1,13 @@
+{
+  "_comment": "Handles nobody can register. Merged from smart-docs' reserved list (its public URLs are /{handle}/...) plus every 3m4 app name and route prefix.",
+  "handles": [
+    "3m4", "about", "accounts", "account", "admin", "administrator", "api", "app", "apps", "assets", "auth",
+    "avatars", "billing", "blog", "bubbles", "build", "changelog", "classic", "contact", "dashboard", "dev",
+    "docs", "download", "downloads", "edit", "editor", "email", "exp", "faq", "feedback", "help", "home",
+    "info", "kinegram", "kinegrama", "legal", "login", "logout", "magic", "mail", "me", "metrics", "mcp",
+    "new", "news", "null", "oauth", "official", "play", "pricing", "privacy", "profile", "projects", "public",
+    "retro", "robots", "root", "search", "security", "session", "sessions", "settings", "signin", "signup",
+    "sitemap", "smart-docs", "smartdocs", "sponsors", "staff", "static", "status", "support", "system",
+    "team", "terms", "test", "undefined", "user", "users", "verify", "widget", "www"
+  ]
+}

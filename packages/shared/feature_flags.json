@@ -1,0 +1,26 @@
+{
+  "_comment": "Registry of accounts' OWN feature switches. Consumed by the Python backend (dbcore/feature_flags.py) and the Qwik frontend (apps/web/src/lib/features.ts). Source of truth in production is PostHog; the PostHog flag key is POSTHOG_FLAG_PREFIX + key (default prefix 'accounts-', because one PostHog project is shared with the other 3m4 apps). `default` is the fail-safe used when PostHog is unreachable or the flag is undefined there; self-host (no POSTHOG_API_KEY) enables everything unless a flag sets `self_host` explicitly.",
+  "flags": {
+    "site-building": {
+      "description": "Site-wide building curtain. ON = the hosted pages show the building page. The API, the JWKS, the avatars and session.js are unaffected. Inverse polarity: OFF is normal operation.",
+      "default": false,
+      "self_host": false,
+      "created": "2026-10-16"
+    },
+    "signups": {
+      "description": "New registrations (password form and first-time OAuth). Login is NEVER gated.",
+      "default": true,
+      "created": "2026-10-16"
+    },
+    "oauth": {
+      "description": "Show the provider buttons (Google, GitHub, Microsoft, Discord) on /login and /signup and allow the OAuth start endpoints.",
+      "default": true,
+      "created": "2026-10-16"
+    },
+    "magic-link": {
+      "description": "Passwordless email links on /login and /magic. OFF hides the option and answers 403 on POST /auth/magic.",
+      "default": true,
+      "created": "2026-10-16"
+    }
+  }
+}
