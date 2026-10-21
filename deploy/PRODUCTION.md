@@ -93,11 +93,13 @@ included) besides verifying the JWT.
    2. Create an API key (sending access, domain `3m4.net`) and put it in `.env`:
       ```
       MAIL_ENABLED=true
-      SMTP_URL=smtps://resend:re_xxxxxxxxx@smtp.resend.com:465
+      SMTP_URL=smtp://resend:re_xxxxxxxxx@smtp.resend.com:587?starttls=1
       MAIL_FROM=3m4 accounts <no-reply@3m4.net>
       ```
       (`resend` is the literal SMTP username; the API key is the password.
-      Port 465 is implicit TLS; `smtp://resend:re_xxx@smtp.resend.com:587?starttls=1`
+      Use 587 + STARTTLS: Hetzner blocks outbound port 465 on this server (the
+      worker logs `timed out` on every attempt). `smtps://…:465` works elsewhere;
+      `smtp://resend:re_xxx@smtp.resend.com:587?starttls=1`
       also works.)
    3. Restart the worker (`docker compose ... up -d worker`) and send yourself
       a magic link from `/login` to confirm delivery. Resend's free tier

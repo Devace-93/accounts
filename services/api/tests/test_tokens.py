@@ -121,3 +121,25 @@ def test_lang_fallback_in_templates():
     assert subject_en == subject_default
     subject, text, html = render("password_changed", lang="en", to="x@example.com", name="Ana")
     assert "Ana" in text and "http://localhost:8085/profile" in html and "password" in subject
+
+
+def test_verify_consume_reissues_the_callers_session(app, client, signup, latest_token):
+    """Relying apps read the claims, not the DB: verifying from the browser that
+    signed up must hand it a fresh JWT with email_verified=true immediately."""
+    import jwt
+
+    signup()
+    old = cookie(client, "3m4_session").value
+    assert jwt.decode(old, options={"verify_signature": False})["email_verified"] is False
+    r = client.post("/api/auth/verify/consume", json={"token": latest_token("verify")})
+    assert r.status_code == 200
+    new = cookie(client, "3m4_session").value
+    assert new != old
+    claims = jwt.decode(new, options={"verify_signature": False})
+    assert claims["email_verified"] is True
+    assert cookie(client, "3m4_refresh", path="/api/session") is not None
+    # another browser's session is left alone
+    signup(email="bob@example.com")
+    other = app.test_client()
+    r = other.post("/api/auth/verify/consume", json={"token": latest_token("verify")})
+    assert r.status_code == 200 and cookie(other, "3m4_session") is None

@@ -20,7 +20,15 @@ from dbcore.models import User
 from dbcore.outbox import enqueue_mail
 from dbcore.posthog_client import capture
 
-from ..auth_utils import attach, hash_password, issue_session, require_session, validate_password, verify_password
+from ..auth_utils import (
+    attach,
+    hash_password,
+    issue_session,
+    optional_user,
+    require_session,
+    validate_password,
+    verify_password,
+)
 from ..errors import ApiError
 from ..extensions import email_key, limiter, user_key
 from ..features import require_feature
@@ -197,6 +205,13 @@ def _token_message(code: str) -> str:
 @limiter.limit("20 per minute")
 def verify_consume():
     data = json_body()
+    # The caller usually clicks the mailed link in the browser that signed up,
+    # so it already holds a session whose JWT still says email_verified=false.
+    # Re-issue that session so the claim flips now instead of at the next
+    # refresh (up to SESSION_TTL_MIN later, during which every relying app
+    # would keep answering 403 email_unverified).
+    current = optional_user()
+    tokens = None
     with session_scope() as session:
         try:
             user, row = email_tokens.consume(session, "verify", data.get("token"))
@@ -204,10 +219,15 @@ def verify_consume():
             raise ApiError(400, err.code, _token_message(err.code)) from err
         if user.email_verified_at is None:
             user.email_verified_at = datetime.now(timezone.utc)
+            session.flush()
+        if current is not None and current.id == user.id:
+            access, refresh_plain, _claims = issue_session(session, user)
+            tokens = (access, refresh_plain)
         body = {"user": serialize_user(user), "return_to": safe_return_to(row.return_to)}
         user_id = str(user.id)
     capture(user_id, "email_verified", {"via": "link"})
-    return jsonify(body)
+    resp = jsonify(body)
+    return attach(resp, *tokens) if tokens else resp
 
 
 @bp.post("/verify/resend")

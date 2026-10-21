@@ -40,7 +40,8 @@ if [ ! -f .env ]; then
   set_var ACCOUNTS_URL https://accounts.3m4.net
   set_var VITE_API_URL /api
   set_var VITE_APP_URL https://accounts.3m4.net
-  # Mail stays disabled until SMTP_URL (Resend) is filled in by hand.
+  # Mail stays disabled until SMTP_URL (Resend) is filled in by hand. Use
+  # smtp://resend:<key>@smtp.resend.com:587?starttls=1 — Hetzner blocks port 465.
   set_var MAIL_ENABLED false
   from3m4 POSTHOG_API_KEY POSTHOG_API_KEY
   from3m4 POSTHOG_PERSONAL_API_KEY POSTHOG_PERSONAL_API_KEY

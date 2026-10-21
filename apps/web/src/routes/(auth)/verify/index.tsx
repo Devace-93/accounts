@@ -1,6 +1,6 @@
 import { component$, useStore, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Link, useLocation, type DocumentHead } from "@builder.io/qwik-city";
-import { api, ApiRequestError } from "../../../lib/api";
+import { api, ApiRequestError, tryRefresh } from "../../../lib/api";
 import { getSession, setSessionUser } from "../../../lib/session";
 import { readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture } from "../../../lib/analytics";
@@ -29,6 +29,10 @@ export default component$(() => {
     if (token) {
       try {
         const res = await api.verifyConsume(token);
+        // The API re-issues the cookie when this browser holds the session; a
+        // refresh covers the other case (verified in a different tab) so the
+        // next app request carries email_verified=true right away.
+        await tryRefresh();
         setSessionUser(res.user);
         state.user = res.user;
         state.phase = "verified";
