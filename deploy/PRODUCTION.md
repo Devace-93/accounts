@@ -11,6 +11,23 @@ set with `Domain=.3m4.net` and reaches all of them: that is the whole SSO
 mechanism. Nothing else needs to run on the other hosts (GitHub Pages sites
 included) besides verifying the JWT.
 
+## Box capacity (read before merging several PRs)
+
+The Hetzner CX22 (4 GB, no swap) runs seven compose stacks. At idle it sits at
+about 75 % memory; one `docker compose up --build` (a Bun/Vite web build peaks
+near 500 MB) fits, two at once do not. On 2026-10-21 exp and retro were merged
+11 seconds apart, both deploys built in parallel, load went past 200 and every
+site plus SSH was unreachable for ~10 minutes.
+
+Rules:
+- **Merge and deploy one app at a time.** Wait for the previous deploy workflow
+  to finish (its containers show a fresh `Up … seconds`) before the next merge.
+- Add a swap file once: `fallocate -l 2G /swapfile && chmod 600 /swapfile &&
+  mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab`.
+  It turns a thrash into a slow build.
+- Longer term: a CX32 (8 GB) removes the constraint; see the sizing table in
+  smart-docs' runbook (its Ollama container is the largest single tenant).
+
 ## First-time setup
 
 1. **Shared network** (once per server; already there if exp is deployed):
