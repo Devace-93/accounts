@@ -174,3 +174,9 @@ docker compose --env-file ../.env -f docker-compose.yml -f docker-compose.prod.y
 ```sh
 BASE_URL=https://accounts.3m4.net sh deploy/smoke.sh
 ```
+
+## OAuth providers
+
+Installing the pairs: `bash deploy/set-oauth.sh [google github microsoft discord]` from your
+machine asks for each client id and secret (secret without echo), writes them into
+`/opt/accounts/.env` over SSH and restarts the API, then prints the providers now enabled.
