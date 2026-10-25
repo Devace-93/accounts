@@ -9,7 +9,7 @@ Goal: one identity for every app under `3m4.net`. Decisions taken on
   form), not forms duplicated in each app.
 - Shared cookie on `Domain=.3m4.net` carrying an Ed25519 JWT; apps verify it
   locally with the JWKS. Logout is global.
-- Phase-1 providers: Google, GitHub, Microsoft, Discord. Facebook later (better
+- Phase-1 providers: Google, GitHub, Discord (Microsoft dropped 2026-10-25: Entra blocked the app registration). Facebook later (better
   sharing from the games).
 - Magic links and mandatory email verification; mail through Resend.
 - Global profile: handle (also smart-docs' public URL segment), name, avatar.
@@ -22,7 +22,7 @@ Goal: one identity for every app under `3m4.net`. Decisions taken on
 |---|---|---|
 | 1 | Contract (`CONTRACT.md`), repo skeleton, deploy files, e2e suite | done (2026-10-16) |
 | 2 | accounts service: dbcore, API (password, sessions, JWKS, verify, magic link, profile, avatars), worker, hosted pages, `session.js`, relying-party packages | done locally (2026-10-16): 40 pytest + 21 Playwright green on `make up` (:8085) |
-| 3 | OAuth: Google, GitHub, Microsoft, Discord (app registrations by Enrique, see `deploy/PRODUCTION.md`) | code done, untested against real providers until client ids exist |
+| 3 | OAuth: Google, GitHub, Discord (app registrations by Enrique, see `deploy/PRODUCTION.md`) | Google + GitHub live in prod 2026-10-25; Discord pending; Microsoft removed |
 | 4 | Production: DNS `accounts`, Caddy block, Resend domain verification, first deploy | pending |
 | 5 | Migrate apps, one PR each, in order: 3m4 shortener → exp → retro → metrics → smart-docs → bubbles. Each: verify the JWT, provision the local user from the claims, drop the local password tables, redirect `/login` + `/signup`, avatar + handle in the nav, global logout | done locally (2026-10-16): every repo's working tree migrated and green against the local accounts stack (3m4 27 e2e, exp 51, retro 28, metrics 15, smart-docs 17 pytest, bubbles 36 pytest); commits + PRs by Enrique |
 | 6 | Static sites: `session.js` on info (login / logout / signup section), kinegram and bubbles (optional login, leaderboard with the shared identity) | done locally (2026-10-16): info committed on `worktree-login-options-standards`, kinegram + bubbles in their working trees |

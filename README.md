@@ -2,8 +2,8 @@
 
 **One login for every 3m4 app.** `accounts.3m4.net` is the identity service
 behind the 3m4 shortener, exp, retro, metrics, smart-docs, bubbles, kinegram
-and the apps index: one email + password (or Google, GitHub, Microsoft,
-Discord, or a magic link), one profile (handle, name, avatar), one session that
+and the apps index: one email + password (or Google, GitHub, Discord, or a
+magic link), one profile (handle, name, avatar), one session that
 every app recognises. Apps keep their own workspaces, plans and data; they just
 stop owning identity. MIT.
 

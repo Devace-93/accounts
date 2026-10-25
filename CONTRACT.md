@@ -103,7 +103,7 @@ Compose project name `accounts`. Frontend tooling is Bun. Brand colour: Tailwind
 | POST | `/auth/magic/consume` | `{token}` | 200 `{user, return_to}` + cookies; marks the email verified. `return_to` is the safe-guarded value stored with the token (default `/profile`). 400 `invalid_token` / `expired_token` / `used_token` |
 | POST | `/auth/verify/consume` | `{token}` | 200 `{user, return_to}`; sets `email_verified_at`. When the caller already holds a session for that same user (the usual case: the mail link opened in the browser that signed up) the response re-issues both cookies, so the JWT carries `email_verified: true` immediately instead of at the next refresh. A caller without a session is not logged in. Same errors as above |
 | POST | `/auth/verify/resend` | `{lang?}` (session) | 202 `{}`; 429 after 3/hour; 409 `already_verified` |
-| GET | `/auth/providers` | — | `{providers: ["google","github","microsoft","discord"]}` (only those configured) |
+| GET | `/auth/providers` | — | `{providers: ["google","github","discord"]}` (only those configured) |
 | GET | `/auth/oauth/<provider>/start` | `?return_to=&link=1` | 302 to the provider; `state` (+ PKCE for providers that support it) kept in a signed, short-lived `3m4_oauth` cookie. `link=1` requires a session and links the identity to it instead of logging in |
 | GET | `/auth/oauth/<provider>/callback` | provider params | 302 to `return_to` (default `/profile`) with cookies set. On failure 302 to `/login?error=oauth_failed&provider=`. New identity + unknown email ⇒ user created (handle derived from the provider login/name, de-duplicated with a numeric suffix; email verified when the provider says so). New identity + known email ⇒ **linked only if the provider reports the email verified**, else `oauth_email_unverified` |
 
@@ -272,6 +272,6 @@ Chrome: the same language picker (34 locales, `3m4.lang`), theme toggle
 `signups` (on), `site-building` (off), `oauth` (on), `magic-link` (on).
 
 ## PostHog events
-`signup{method: password|google|github|microsoft|discord}`, `login{method}`,
+`signup{method: password|google|github|discord}`, `login{method}`,
 `magic_link_requested`, `email_verified`, `identity_linked{provider}`,
 `avatar_updated`, `logout`. Person id = user id.

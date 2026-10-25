@@ -1,5 +1,5 @@
-"""OAuth sign-in / sign-up / linking with Google, GitHub, Microsoft and
-Discord (Authlib).
+"""OAuth sign-in / sign-up / linking with Google, GitHub and Discord
+(Authlib).
 
 Flow: ``GET /start`` stores ``return_to`` / ``link`` intent next to Authlib's
 state, nonce and PKCE verifier in the signed ``3m4_oauth`` cookie (Flask's
@@ -18,9 +18,7 @@ every rule from CONTRACT.md:
 
 Trust notes: Google and Discord expose ``email_verified`` / ``verified``.
 GitHub lists its e-mails with a ``verified`` flag and we pick the primary
-verified one. Microsoft's OIDC userinfo ``email`` claim is treated as
-verified (Microsoft verifies account e-mails; ``preferred_username`` is NOT
-used because it can be an unverified alias).
+verified one.
 
 Failures never raise to the browser: they redirect to
 ``/login?error=<code>&provider=<name>`` on the accounts site.
@@ -53,7 +51,7 @@ log = logging.getLogger("accounts.oauth")
 
 bp = Blueprint("oauth", __name__)
 
-PROVIDERS = ("google", "github", "microsoft", "discord")
+PROVIDERS = ("google", "github", "discord")
 CTX_KEY = "oauth_ctx"
 
 
@@ -105,18 +103,6 @@ def register_providers(registry) -> None:
             access_token_url="https://github.com/login/oauth/access_token",
             api_base_url="https://api.github.com/",
             client_kwargs={"scope": "read:user user:email"},
-        )
-    creds = config.oauth_credentials("microsoft")
-    if creds:
-        tenant = config.oauth_microsoft_tenant
-        registry.register(
-            name="microsoft",
-            client_id=creds[0],
-            client_secret=creds[1],
-            authorize_url=f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize",
-            access_token_url=f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
-            api_base_url="https://graph.microsoft.com/",
-            client_kwargs={"scope": "openid email profile User.Read", "code_challenge_method": "S256"},
         )
     creds = config.oauth_credentials("discord")
     if creds:
@@ -175,15 +161,6 @@ def fetch_profile(provider: str, client, token: dict) -> ProviderProfile:
             name=user.get("name"), login=user.get("login"), picture=picture,
             raw={k: user.get(k) for k in ("id", "login", "name", "html_url")},
         )
-    if provider == "microsoft":
-        info = client.get("oidc/userinfo", token=token).json()
-        email = info.get("email")
-        picture = None  # fetched lazily by picture_bytes (binary endpoint)
-        return ProviderProfile(
-            provider, str(info["sub"]), email, bool(email),
-            name=info.get("name"), login=None, picture=picture,
-            raw={k: info.get(k) for k in ("sub", "name", "email")},
-        )
     if provider == "discord":
         me = client.get("users/@me", token=token).json()
         picture = None
@@ -200,13 +177,9 @@ def fetch_profile(provider: str, client, token: dict) -> ProviderProfile:
 def picture_bytes(provider: str, client, token: dict, profile: ProviderProfile) -> bytes | None:
     """Download the provider picture, already normalised to our WebP; None on any problem."""
     try:
-        if provider == "microsoft":
-            resp = client.get("v1.0/me/photo/$value", token=token)
-            data = resp.content if resp.status_code == 200 else None
-        elif profile.picture:
-            data = requests.get(profile.picture, timeout=5).content
-        else:
+        if not profile.picture:
             return None
+        data = requests.get(profile.picture, timeout=5).content
         return avatars.process_upload(data) if data else None
     except Exception:
         return None

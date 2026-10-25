@@ -57,9 +57,6 @@ class Config:
     oauth_google_client_secret: str = os.getenv("OAUTH_GOOGLE_CLIENT_SECRET", "")
     oauth_github_client_id: str = os.getenv("OAUTH_GITHUB_CLIENT_ID", "")
     oauth_github_client_secret: str = os.getenv("OAUTH_GITHUB_CLIENT_SECRET", "")
-    oauth_microsoft_client_id: str = os.getenv("OAUTH_MICROSOFT_CLIENT_ID", "")
-    oauth_microsoft_client_secret: str = os.getenv("OAUTH_MICROSOFT_CLIENT_SECRET", "")
-    oauth_microsoft_tenant: str = os.getenv("OAUTH_MICROSOFT_TENANT", "common") or "common"
     oauth_discord_client_id: str = os.getenv("OAUTH_DISCORD_CLIENT_ID", "")
     oauth_discord_client_secret: str = os.getenv("OAUTH_DISCORD_CLIENT_SECRET", "")
 
