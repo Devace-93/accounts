@@ -13,7 +13,7 @@
       "created": "2026-10-16"
     },
     "oauth": {
-      "description": "Show the provider buttons (Google, GitHub, Microsoft, Discord) on /login and /signup and allow the OAuth start endpoints.",
+      "description": "Show the provider buttons (Google, GitHub, Discord) on /login and /signup and allow the OAuth start endpoints.",
       "default": true,
       "created": "2026-10-16"
     },

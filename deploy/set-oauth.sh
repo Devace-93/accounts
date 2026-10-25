@@ -14,7 +14,7 @@ set -euo pipefail
 HOST="${ACCOUNTS_SSH_HOST:-root@46.225.62.18}"
 ENV_FILE="${ACCOUNTS_ENV_FILE:-/opt/accounts/.env}"
 PROVIDERS=("$@")
-[ ${#PROVIDERS[@]} -eq 0 ] && PROVIDERS=(google github microsoft discord)
+[ ${#PROVIDERS[@]} -eq 0 ] && PROVIDERS=(google github discord)
 
 lines=""
 for p in "${PROVIDERS[@]}"; do

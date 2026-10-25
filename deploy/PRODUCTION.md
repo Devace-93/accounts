@@ -133,7 +133,6 @@ Rules:
    |---|---|---|---|
    | Google | [Google Cloud console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials) → *Create credentials → OAuth client ID*, type **Web application**. First configure the *OAuth consent screen* (External, app name "3m4 accounts", support email, authorised domain `3m4.net`, scopes `openid`, `email`, `profile`). Add both callback URLs as *Authorised redirect URIs*. Publish the consent screen (otherwise only test users can log in). | scopes `openid email profile` | `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET` |
    | GitHub | [github.com/settings/developers](https://github.com/settings/developers) → *OAuth Apps → New OAuth App* (one app per callback URL: GitHub allows a single *Authorization callback URL* per app, so register a second app for localhost, or set the local pair only in your local `.env`). Homepage `https://accounts.3m4.net`. | scope `read:user user:email` (GitHub emails are fetched from `/user/emails`; only `verified: true` ones count) | `OAUTH_GITHUB_CLIENT_ID`, `OAUTH_GITHUB_CLIENT_SECRET` |
-   | Microsoft | [Entra admin center → App registrations](https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade) → *New registration*. Supported account types: **Accounts in any organizational directory and personal Microsoft accounts** (that is the `common` tenant). Platform **Web**, both redirect URIs. *Certificates & secrets → New client secret* (note the expiry; 24 months max). API permissions: Microsoft Graph delegated `openid`, `email`, `profile`, `User.Read`. | authority `https://login.microsoftonline.com/common/v2.0`, scopes `openid email profile` | `OAUTH_MICROSOFT_CLIENT_ID`, `OAUTH_MICROSOFT_CLIENT_SECRET`, `OAUTH_MICROSOFT_TENANT=common` |
    | Discord | [discord.com/developers/applications](https://discord.com/developers/applications) → *New Application* → **OAuth2**: add both redirect URLs, copy the *Client ID* and *Reset Secret*. | scopes `identify email` | `OAUTH_DISCORD_CLIENT_ID`, `OAUTH_DISCORD_CLIENT_SECRET` |
 
    After editing `.env`: `docker compose ... up -d api web` and check
@@ -177,6 +176,6 @@ BASE_URL=https://accounts.3m4.net sh deploy/smoke.sh
 
 ## OAuth providers
 
-Installing the pairs: `bash deploy/set-oauth.sh [google github microsoft discord]` from your
+Installing the pairs: `bash deploy/set-oauth.sh [google github discord]` from your
 machine asks for each client id and secret (secret without echo), writes them into
 `/opt/accounts/.env` over SSH and restarts the API, then prints the providers now enabled.

@@ -64,7 +64,7 @@ class Identity(Base):
 
     id: Mapped[uuid.UUID] = _pk()
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    provider: Mapped[str] = mapped_column(String(20), nullable=False)  # google|github|microsoft|discord
+    provider: Mapped[str] = mapped_column(String(20), nullable=False)  # google|github|discord
     provider_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
     provider_email: Mapped[str | None] = mapped_column(String(255))
     profile: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")

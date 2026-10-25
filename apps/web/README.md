@@ -47,7 +47,7 @@ English key (same placeholders, nothing extra) and that every locale in
 
 - `components/password-field.tsx` — the one password input (eye / eye-off
   toggle) used by login, signup, confirm and the profile password form.
-- `components/provider-buttons.tsx` — Google / GitHub / Microsoft / Discord
+- `components/provider-buttons.tsx` — Google / GitHub / Discord
   buttons, rendered only for providers `GET /api/auth/providers` returns.
 - `components/unverified-banner.tsx` — resend-verification notice on `/profile`.
 

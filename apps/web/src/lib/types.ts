@@ -10,7 +10,7 @@ export interface User {
   created_at: string;
 }
 
-export type Provider = "google" | "github" | "microsoft" | "discord";
+export type Provider = "google" | "github" | "discord";
 
 export interface Identity {
   provider: Provider;
