@@ -10,7 +10,10 @@ service at `https://accounts.3m4.net/session.js`.
 ```
 
 - **Signed out:** `Log in` · `Sign up` links to the hosted pages, with
-  `return_to` set to the current page.
+  `return_to` set to the current page and `lang` set to the host's locale
+  (`localStorage["3m4.lang"]`, else `<html lang>`, e.g. `es-MX`) so accounts
+  opens in the same language. Storage is per origin, so this is how the
+  choice travels; accounts ignores unknown values.
 - **Signed in:** avatar + `@handle`; clicking opens a menu with `Profile` and
   `Log out`.
 - Without `data-mount` (or when the selector matches nothing) it floats in the
@@ -28,7 +31,7 @@ service at `https://accounts.3m4.net/session.js`.
 |---|---|
 | `get(force?)` | `Promise<User \| null>`; cached, re-fetched when the tab becomes visible or with `force` |
 | `onChange(cb)` | calls `cb(user)` now (if known) and on every change; returns an unsubscribe function |
-| `login(returnTo?)` / `signup(returnTo?)` / `profile()` | navigate to the hosted pages |
+| `login(returnTo?)` / `signup(returnTo?)` / `profile()` | navigate to the hosted pages (with `return_to` and the host's `lang`) |
 | `logout()` | `POST /api/session/logout` with credentials, then notifies |
 | `origin` | the accounts origin the widget talks to |
 

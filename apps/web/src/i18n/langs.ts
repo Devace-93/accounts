@@ -59,13 +59,26 @@ export function isRtl(code: string): boolean {
   return RTL_LANGS.includes(baseOf(code));
 }
 
+/**
+ * Map a stored / requested value to a supported locale code, or null when it
+ * is unknown. Exact codes win; a bare base language (`es`, `pt`) or an
+ * unlisted country variant (`es-UY`) falls back to the first entry with that
+ * base language. Used for `localStorage` values and the `?lang=` parameter.
+ */
+export function normalizeLang(value: string | null | undefined): string | null {
+  if (!value || typeof value !== "string") return null;
+  const v = value.trim();
+  if (!/^[A-Za-z]{2}(-[A-Za-z0-9]{2,8})?$/.test(v)) return null;
+  const exact = LANGS.find((l) => l.code.toLowerCase() === v.toLowerCase());
+  if (exact) return exact.code;
+  const base = baseOf(v).toLowerCase();
+  return LANGS.find((l) => baseOf(l.code) === base)?.code ?? null;
+}
+
 /** Pick the active locale from a saved value and the browser language. */
 export function resolveLang(saved: string | null, navigatorLang: string | undefined): string {
-  if (saved) {
-    if (LANGS.some((l) => l.code === saved)) return saved;
-    const migrated = LANGS.find((l) => l.code.startsWith(saved));
-    if (migrated) return migrated.code;
-  }
+  const fromSaved = normalizeLang(saved);
+  if (fromSaved) return fromSaved;
   const nav = navigatorLang || DEFAULT_LANG;
   if (LANGS.some((l) => l.code === nav)) return nav;
   const base = baseOf(nav);

@@ -3,7 +3,7 @@ import { Link, useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { api, ApiRequestError } from "../../../lib/api";
 import { FeaturesContext } from "../../../lib/features";
 import { getSession, setSessionUser } from "../../../lib/session";
-import { goTo, readReturnTo, withReturnTo } from "../../../lib/returnTo";
+import { goTo, readLang, readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture, identify } from "../../../lib/analytics";
 import { PasswordField } from "../../../components/password-field";
 import { PROVIDER_NAMES, ProviderButtons } from "../../../components/provider-buttons";
@@ -15,6 +15,8 @@ export default component$(() => {
   const i18n = useI18n();
   const features = useContext(FeaturesContext);
   const returnTo = readReturnTo(loc.url);
+  // `?lang=` from the relying site; carried along the hops between the hosted pages.
+  const lang = readLang(loc.url);
   const password = useSignal("");
   const state = useStore({ email: "", loading: false, error: "" });
 
@@ -86,12 +88,12 @@ export default component$(() => {
                 email typed so far always travels along (a reactive href can lag
                 one render behind a fast click). */}
             <a
-              href={withReturnTo("/magic", returnTo)}
+              href={withReturnTo("/magic", returnTo, { lang })}
               class="font-medium text-primary-600 hover:underline"
               data-testid="magic-link"
               preventdefault:click
               onClick$={() => {
-                location.assign(withReturnTo("/magic", returnTo, state.email ? { email: state.email } : undefined));
+                location.assign(withReturnTo("/magic", returnTo, { lang, email: state.email || undefined }));
               }}
             >
               {tr(i18n, "auth.magicLinkCta")}
@@ -105,7 +107,7 @@ export default component$(() => {
       {features.signups && (
         <p class="mt-6 text-center text-sm text-slate-500">
           {tr(i18n, "auth.noAccount")}{" "}
-          <Link href={withReturnTo("/signup", returnTo)} class="font-medium text-primary-600 hover:underline">
+          <Link href={withReturnTo("/signup", returnTo, { lang })} class="font-medium text-primary-600 hover:underline">
             {tr(i18n, "auth.signUp")}
           </Link>
         </p>

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, type DocumentHead } from "@builder.io/q
 import { api, ApiRequestError } from "../../../lib/api";
 import { FeaturesContext } from "../../../lib/features";
 import { getSession, setSessionUser } from "../../../lib/session";
-import { goTo, readReturnTo, withReturnTo } from "../../../lib/returnTo";
+import { goTo, readLang, readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture, identify } from "../../../lib/analytics";
 import { PasswordField } from "../../../components/password-field";
 import { ProviderButtons } from "../../../components/provider-buttons";
@@ -38,6 +38,7 @@ export default component$(() => {
   const i18n = useI18n();
   const features = useContext(FeaturesContext);
   const returnTo = readReturnTo(loc.url);
+  const lang = readLang(loc.url);
 
   const password = useSignal("");
   const confirm = useSignal("");
@@ -101,7 +102,7 @@ export default component$(() => {
         <p class="mt-3 text-sm text-slate-500">{tr(i18n, "auth.inviteOnlyBody")}</p>
         <p class="mt-6 text-sm text-slate-500">
           {tr(i18n, "auth.haveAccount")}{" "}
-          <Link href={withReturnTo("/login", returnTo)} class="font-medium text-primary-600 hover:underline">
+          <Link href={withReturnTo("/login", returnTo, { lang })} class="font-medium text-primary-600 hover:underline">
             {tr(i18n, "auth.logIn")}
           </Link>
         </p>
@@ -211,7 +212,7 @@ export default component$(() => {
 
       <p class="mt-6 text-center text-sm text-slate-500">
         {tr(i18n, "auth.haveAccount")}{" "}
-        <Link href={withReturnTo("/login", returnTo)} class="font-medium text-primary-600 hover:underline">
+        <Link href={withReturnTo("/login", returnTo, { lang })} class="font-medium text-primary-600 hover:underline">
           {tr(i18n, "auth.logIn")}
         </Link>
       </p>

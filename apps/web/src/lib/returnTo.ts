@@ -8,6 +8,8 @@
  * protocol-relative `//evil`) falls back to `/profile`, so the pages can never
  * be used as an open redirect.
  */
+import { normalizeLang } from "../i18n/langs";
+
 export const DEFAULT_RETURN = "/profile";
 
 function appOrigin(): string | null {
@@ -45,10 +47,23 @@ export function readReturnTo(url: URL | { searchParams: URLSearchParams }): stri
   return isAllowedReturn(raw) ? raw : DEFAULT_RETURN;
 }
 
-/** Append `return_to` to a local path (dropped when it is the default). */
-export function withReturnTo(path: string, returnTo: string, extra?: Record<string, string>): string {
-  const params = new URLSearchParams(extra);
+/**
+ * The `lang` a relying site handed over (CONTRACT.md → Hosted pages), as a
+ * supported locale code, or undefined when absent / unknown. Carried along
+ * the hops between the hosted pages so the language survives them.
+ */
+export function readLang(url: URL | { searchParams: URLSearchParams }): string | undefined {
+  return normalizeLang(url.searchParams.get("lang")) ?? undefined;
+}
+
+/**
+ * Append `return_to` (dropped when it is the default) and any extra params
+ * (`lang`, `email`, …; undefined / empty values are skipped) to a local path.
+ */
+export function withReturnTo(path: string, returnTo: string, extra?: Record<string, string | undefined>): string {
+  const params = new URLSearchParams();
   if (returnTo && returnTo !== DEFAULT_RETURN) params.set("return_to", returnTo);
+  for (const [k, v] of Object.entries(extra ?? {})) if (v) params.set(k, v);
   const qs = params.toString();
   return qs ? `${path}?${qs}` : path;
 }
