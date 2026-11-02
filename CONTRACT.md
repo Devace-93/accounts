@@ -54,10 +54,18 @@ Compose project name `accounts`. Frontend tooling is Bun. Brand colour: Tailwind
     "handle": "ana",
     "name": "Ana López",
     "avatar_url": "https://accounts.3m4.net/avatars/<user uuid>?v=3",
+    "currency": "mxn",
     "iat": 1760000000,
     "exp": 1760000900
   }
   ```
+
+  `currency` is optional: the user's preferred currency as a lowercase ISO
+  4217 code from `ALLOWED_CURRENCIES` (`usd,mxn,eur`), **absent** when unset.
+  Claims are snapshotted at signing time: a profile change (handle, name,
+  avatar, currency) reaches relying apps on the next issued access token,
+  i.e. the next `POST /api/session/refresh`, at most `SESSION_TTL_MIN`
+  (15 min) later. Apps that need it sooner call `GET /api/me`.
 
 - Expired access token ⇒ the app answers `401 session_expired`; the client
   calls `POST /api/session/refresh` (credentials included) and retries once.
@@ -126,7 +134,7 @@ of the same kind.
 | Method | Path | Body | Response |
 |---|---|---|---|
 | GET | `/me` | — | `{user, has_password, identities: [{provider, provider_email, created_at}]}` |
-| PATCH | `/me` | `{name?, handle?}` | `{user}`; handle errors as in signup. Changing the handle is allowed but the UI warns that smart-docs public URLs change |
+| PATCH | `/me` | `{name?, handle?, preferred_currency?}` | `{user}`; handle errors as in signup. Changing the handle is allowed but the UI warns that smart-docs public URLs change. `preferred_currency`: one of `ALLOWED_CURRENCIES` (case-insensitive, stored lowercase), `null` or `""` clears; 400 `invalid_currency`. Takes effect in the JWT on the next refresh (≤ 15 min) |
 | PUT | `/me/password` | `{current_password?, new_password}` | 204. `current_password` is required when `has_password`; 401 `invalid_credentials`. Revokes every **other** session |
 | PUT | `/me/avatar` | `multipart/form-data`, field `file` (png/jpeg/webp/gif ≤ 2 MB) | `{user}` with a bumped `avatar_url` version. Server crops to a centred square and stores 256×256 WebP. 400 `invalid_image` / 413 |
 | DELETE | `/me/avatar` | — | `{user}` (back to the generated default) |
@@ -156,6 +164,7 @@ User {
   "handle": "ana",
   "name": "Ana López",
   "avatar_url": "https://accounts.3m4.net/avatars/uuid?v=3",
+  "preferred_currency": "mxn",
   "created_at": "2026-10-16T00:00:00Z"
 }
 ```
@@ -166,12 +175,16 @@ User {
   local part, de-duplicated with `-2`, `-3`…
 - `name`: 1–80 chars, optional (defaults to the handle in the UI).
 - `email`: stored lowercase, unique, max 255.
+- `preferred_currency`: lowercase ISO 4217 code from `ALLOWED_CURRENCIES`
+  (`usd,mxn,eur`), or `null` when the user never picked one. Mirrored as the
+  optional `currency` JWT claim.
 
 ## Data model (Postgres)
 
 ```
 users            id uuid pk, email unique, email_verified_at, password_hash (null = no password),
-                 handle unique, name, avatar_version int default 0, created_at, updated_at
+                 handle unique, name, avatar_version int default 0, preferred_currency (null = unset),
+                 created_at, updated_at
 identities       id, user_id fk cascade, provider, provider_user_id, provider_email,
                  profile jsonb, created_at — unique (provider, provider_user_id)
 sessions         id uuid pk (= sid), user_id fk cascade, refresh_hash unique, user_agent,
@@ -205,7 +218,7 @@ sent straight to `return_to`.
 | `/signup` | email, handle (prefilled from the email as you type, editable, availability hint), password + confirm (each with its own show/hide toggle, mismatch shown inline), provider buttons, link to login. Hidden behind the `signups` feature switch like the other apps |
 | `/magic` | without `token`: the request form; with `token`: POSTs it on load and redirects to `return_to`; errors offer to request a new one |
 | `/verify` | with `token`: consumes it and shows success + "Continue" to `return_to`; without: "check your inbox" with a resend button (session required) |
-| `/profile` | avatar (upload/remove, preview), name, handle (with the smart-docs URL warning), email + verified badge + resend, password (set/change), linked providers (link/unlink), active sessions (revoke one / all), log out |
+| `/profile` | avatar (upload/remove, preview), name, handle (with the smart-docs URL warning), preferred currency (—/USD/MXN/EUR), email + verified badge + resend, password (set/change), linked providers (link/unlink), active sessions (revoke one / all), log out |
 | `/logout` | POSTs logout then redirects to `return_to` or `/login` |
 
 Chrome: the same language picker (34 locales, `3m4.lang`), theme toggle

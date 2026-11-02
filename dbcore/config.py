@@ -48,6 +48,11 @@ class Config:
     ip_hash_secret: str = os.getenv("IP_HASH_SECRET", "dev-insecure-ip-salt")
     jwt_audience: str = "3m4"
 
+    # profile: lowercase ISO 4217 codes a user may pick as preferred currency
+    allowed_currencies: tuple[str, ...] = field(
+        default_factory=lambda: tuple(c.lower() for c in _csv("ALLOWED_CURRENCIES", "usd,mxn,eur"))
+    )
+
     # email tokens
     magic_token_ttl_min: int = int(os.getenv("MAGIC_TOKEN_TTL_MIN", "15"))
     verify_token_ttl_hours: int = int(os.getenv("VERIFY_TOKEN_TTL_HOURS", "24"))

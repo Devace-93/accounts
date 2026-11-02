@@ -7,6 +7,8 @@ export interface User {
   handle: string;
   name: string | null;
   avatar_url: string;
+  /** Lowercase ISO 4217 (usd | mxn | eur); null when the user never picked one. */
+  preferred_currency: string | null;
   created_at: string;
 }
 

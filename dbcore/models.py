@@ -50,6 +50,8 @@ class User(Base):
     handle: Mapped[str] = mapped_column(String(32), nullable=False, unique=True, index=True)
     name: Mapped[str | None] = mapped_column(String(80))
     avatar_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # Lowercase ISO 4217 code from ``ALLOWED_CURRENCIES``; null = not set.
+    preferred_currency: Mapped[str | None] = mapped_column(String(3))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

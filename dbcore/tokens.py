@@ -29,7 +29,7 @@ def avatar_url(user_id, version: int) -> str:
 
 def session_claims(user, sid, *, now: int | None = None) -> dict:
     now = int(now if now is not None else time.time())
-    return {
+    claims = {
         "iss": config.accounts_url,
         "aud": config.jwt_audience,
         "sub": str(user.id),
@@ -42,6 +42,11 @@ def session_claims(user, sid, *, now: int | None = None) -> dict:
         "iat": now,
         "exp": now + config.session_ttl_min * 60,
     }
+    # Optional claims: present only when set (relying apps treat absence as "unset").
+    currency = getattr(user, "preferred_currency", None)
+    if currency:
+        claims["currency"] = currency
+    return claims
 
 
 def sign_session(user, sid) -> tuple[str, dict]:

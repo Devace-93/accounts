@@ -20,6 +20,8 @@ interface User {
   handle: string;
   name: string | null;
   avatar_url: string;
+  /** Lowercase ISO 4217 (usd | mxn | eur); null / absent when never set. */
+  preferred_currency?: string | null;
 }
 
 interface M4Session {

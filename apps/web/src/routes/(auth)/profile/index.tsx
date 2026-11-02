@@ -12,6 +12,8 @@ import { tr, trError, useI18n, type I18nState } from "../../../i18n";
 
 const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 const MIN_PASSWORD = 8;
+/** Mirrors the API's ALLOWED_CURRENCIES default (lowercase ISO 4217). */
+const CURRENCIES = ["usd", "mxn", "eur"] as const;
 
 function errorText(i18n: I18nState, e: unknown): string {
   return e instanceof ApiRequestError ? trError(i18n, e.error.code, e.error.message) : tr(i18n, "auth.err.network");
@@ -63,7 +65,7 @@ export default component$(() => {
   const sessions = useSignal<SessionRow[]>([]);
   const loadError = useSignal("");
 
-  const form = useStore({ name: "", handle: "", saving: false, msg: "", error: "" });
+  const form = useStore({ name: "", handle: "", currency: "", saving: false, msg: "", error: "" });
   const avatar = useStore({ busy: false, error: "", version: 0 });
   const current = useSignal("");
   const next = useSignal("");
@@ -78,6 +80,7 @@ export default component$(() => {
       me.value = data;
       form.name = data.user.name ?? "";
       form.handle = data.user.handle;
+      form.currency = data.user.preferred_currency ?? "";
       setSessionUser(data.user);
       const [list, prov] = await Promise.all([api.sessions().catch(() => ({ items: [] })), api.providers().catch(() => ({ providers: [] }))]);
       sessions.value = list.items;
@@ -113,9 +116,10 @@ export default component$(() => {
     }
     form.saving = true;
     try {
-      const patch: { name?: string; handle?: string } = {};
+      const patch: { name?: string; handle?: string; preferred_currency?: string | null } = {};
       if ((me.value.user.name ?? "") !== form.name.trim()) patch.name = form.name.trim();
       if (me.value.user.handle !== handle) patch.handle = handle;
+      if ((me.value.user.preferred_currency ?? "") !== form.currency) patch.preferred_currency = form.currency || null;
       if (Object.keys(patch).length) {
         const res = await api.updateMe(patch);
         me.value = { ...me.value, user: res.user };
@@ -333,6 +337,22 @@ export default component$(() => {
             </div>
             <p class="mt-1 text-xs text-slate-400">{tr(i18n, "auth.handleHint")}</p>
             {form.handle !== user.handle && <p class="alert-warn mt-2 text-xs">{tr(i18n, "profile.handleWarning")}</p>}
+          </div>
+          <div>
+            <label class="label" for="currency">
+              {tr(i18n, "profile.currency")}
+            </label>
+            <select id="currency" class="input" data-testid="currency" value={form.currency} onChange$={(_, el) => (form.currency = el.value)}>
+              <option value="" selected={form.currency === ""}>
+                {tr(i18n, "profile.currencyNone")}
+              </option>
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c} selected={form.currency === c}>
+                  {c.toUpperCase()}
+                </option>
+              ))}
+            </select>
+            <p class="mt-1 text-xs text-slate-400">{tr(i18n, "profile.currencyHint")}</p>
           </div>
           <div>
             <span class="label">{tr(i18n, "profile.email")}</span>
