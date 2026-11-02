@@ -2,7 +2,7 @@ import { component$, useVisibleTask$ } from "@builder.io/qwik";
 import { useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { api } from "../../../lib/api";
 import { clearSession } from "../../../lib/session";
-import { isAllowedReturn } from "../../../lib/returnTo";
+import { isAllowedReturn, readLang, withReturnTo } from "../../../lib/returnTo";
 import { capture, resetAnalytics } from "../../../lib/analytics";
 import { tr, useI18n } from "../../../i18n";
 
@@ -11,7 +11,7 @@ export default component$(() => {
   const loc = useLocation();
   const i18n = useI18n();
   const raw = loc.url.searchParams.get("return_to") || "";
-  const dest = raw && isAllowedReturn(raw) ? raw : "/login";
+  const dest = raw && isAllowedReturn(raw) ? raw : withReturnTo("/login", "", { lang: readLang(loc.url) });
 
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {

@@ -2,7 +2,7 @@ import { component$, useStore, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Link, useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { api, ApiRequestError, tryRefresh } from "../../../lib/api";
 import { getSession, setSessionUser } from "../../../lib/session";
-import { readReturnTo, withReturnTo } from "../../../lib/returnTo";
+import { readLang, readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture } from "../../../lib/analytics";
 import type { User } from "../../../lib/types";
 import { tr, trError, useI18n } from "../../../i18n";
@@ -16,6 +16,7 @@ export default component$(() => {
   const loc = useLocation();
   const i18n = useI18n();
   const returnTo = readReturnTo(loc.url);
+  const lang = readLang(loc.url);
   const token = loc.url.searchParams.get("token") || "";
   const state = useStore({
     phase: (token ? "consuming" : "loading") as "consuming" | "verified" | "failed" | "loading" | "inbox" | "anonymous",
@@ -93,10 +94,10 @@ export default component$(() => {
         <p class="mt-3 text-sm text-red-700" role="alert" data-testid="error">
           {state.error}
         </p>
-        <Link href={withReturnTo("/verify", returnTo)} class="btn-primary mt-6 w-full">
+        <Link href={withReturnTo("/verify", returnTo, { lang })} class="btn-primary mt-6 w-full">
           {tr(i18n, "auth.verifyResend")}
         </Link>
-        <Link href={withReturnTo("/login", returnTo)} class="btn-ghost mt-2 w-full">
+        <Link href={withReturnTo("/login", returnTo, { lang })} class="btn-ghost mt-2 w-full">
           {tr(i18n, "auth.backToLogin")}
         </Link>
       </div>
@@ -108,7 +109,7 @@ export default component$(() => {
       <div class="card p-8 text-center">
         <h1 class="text-2xl font-bold text-slate-900">{tr(i18n, "auth.verifyTitle")}</h1>
         <p class="mt-3 text-sm text-slate-500">{tr(i18n, "auth.verifyNeedLogin")}</p>
-        <Link href={withReturnTo("/login", withReturnTo("/verify", returnTo))} class="btn-primary mt-6 w-full">
+        <Link href={withReturnTo("/login", withReturnTo("/verify", returnTo, { lang }), { lang })} class="btn-primary mt-6 w-full">
           {tr(i18n, "auth.logIn")}
         </Link>
       </div>

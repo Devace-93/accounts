@@ -14,7 +14,7 @@ export const session = createSessionClient(import.meta.env.VITE_ACCOUNTS_URL || 
 |---|---|
 | `session.getSession()` | `User \| null`, cached 30 s. Re-check on `visibilitychange` if you render auth state. |
 | `session.fetchWithSession(url, init)` | `fetch` with credentials; on `401 session_expired` refreshes once and retries. |
-| `session.loginUrl()` / `signupUrl()` / `profileUrl()` / `logoutUrl()` | hosted pages with `return_to` = current page. |
+| `session.loginUrl(returnTo?, lang?)` / `signupUrl(returnTo?, lang?)` / `profileUrl(lang?)` / `logoutUrl(returnTo?, lang?)` | hosted pages with `return_to` = current page (or `returnTo`). Pass the app's locale (`localStorage["3m4.lang"]`, e.g. `"es-MX"`) as `lang` and it is appended as `?lang=` so accounts opens in that language; storage is per origin, so this is the only way the choice travels. Unknown values are ignored by accounts. |
 | `session.logout(all?)` | `POST /api/session/logout` and clears the cache. |
 
 Your own API must answer `401 no_session`, `401 session_expired` and
@@ -43,7 +43,8 @@ if (res.status === 403 && (await res.clone().json()).error?.code === "email_unve
    export const onGet: RequestHandler = ({ redirect, url, env }) => {
      const accounts = env.get("ACCOUNTS_URL") || "https://accounts.3m4.net";
      const back = url.searchParams.get("return_to") || `${url.origin}/dashboard`;
-     throw redirect(302, `${accounts}/login?return_to=${encodeURIComponent(back)}`);
+     const lang = url.searchParams.get("lang"); // forward the viewer's locale when the caller passes it
+     throw redirect(302, `${accounts}/login?return_to=${encodeURIComponent(back)}${lang ? `&lang=${encodeURIComponent(lang)}` : ""}`);
    };
    ```
 
@@ -51,7 +52,7 @@ if (res.status === 403 && (await res.clone().json()).error?.code === "email_unve
    the Caddy matchers still work.
 3. **Dashboard guard** (`routes/(dashboard)/layout.tsx`): replace
    `isAuthenticated()` with `await session.getSession()`; `null` →
-   `location.assign(session.loginUrl())`. Keep resolving `/auth/me` from the
+   `location.assign(session.loginUrl(undefined, localStorage.getItem("3m4.lang") || undefined))`. Keep resolving `/auth/me` from the
    app's API for app-specific data (plan, features); it now reads the cookie.
 4. **Nav**: show `user.avatar_url` + `@handle` linking to
    `session.profileUrl()`, and make **Log out** call `session.logout()` then

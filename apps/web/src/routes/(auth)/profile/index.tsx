@@ -2,7 +2,7 @@ import { component$, useComputed$, useSignal, useStore, useVisibleTask$, $ } fro
 import { useLocation, useNavigate, type DocumentHead } from "@builder.io/qwik-city";
 import { api, ApiRequestError } from "../../../lib/api";
 import { clearSession, setSessionUser } from "../../../lib/session";
-import { withReturnTo } from "../../../lib/returnTo";
+import { readLang, withReturnTo } from "../../../lib/returnTo";
 import { capture, resetAnalytics } from "../../../lib/analytics";
 import type { Me, Provider, SessionRow } from "../../../lib/types";
 import { PasswordField } from "../../../components/password-field";
@@ -88,7 +88,7 @@ export default component$(() => {
     } catch (e) {
       if (e instanceof ApiRequestError && e.status === 401) {
         clearSession();
-        await nav(withReturnTo("/login", loc.url.pathname + loc.url.search));
+        await nav(withReturnTo("/login", loc.url.pathname + loc.url.search, { lang: readLang(loc.url) }));
         return;
       }
       loadError.value = errorText(i18n, e);

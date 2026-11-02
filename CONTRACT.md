@@ -211,6 +211,18 @@ All accept `?return_to=<absolute url on an allowed origin>`; when absent the
 destination is `/profile`. Signed-in visitors of `/login` and `/signup` are
 sent straight to `return_to`.
 
+All also accept `?lang=<locale>` (e.g. `es-MX`): the language the relying
+site is showing. Each 3m4 site keeps the viewer's choice in its own
+`localStorage["3m4.lang"]`, which is per origin, so the sending site hands it
+over in the URL (`session.js` and the `m4session.ts` helpers do this). The
+page honours it first, saves it to accounts' own `3m4.lang`, then falls back
+to that storage / `navigator.language` as usual. Validation: an exact code
+from the 34-locale list wins (case-insensitive); an unlisted variant or a
+bare base language (`es`, `es-UY`) maps to the first locale with that base
+language; anything else is ignored silently. The hops between `/login`,
+`/signup`, `/magic` and `/verify` carry `lang` along; the final redirect to
+`return_to` does not (the relying site has its own state).
+
 | Path | Content |
 |---|---|
 | `/` | redirect: `/profile` when signed in, else `/login` |
@@ -232,7 +244,7 @@ Chrome: the same language picker (34 locales, `3m4.lang`), theme toggle
 ```
 
 - Renders, signed out: **Log in** · **Sign up** (links to the hosted pages with
-  `return_to=location.href`). Signed in: avatar + handle; clicking opens a
+  `return_to=location.href` and `lang=` the host's `3m4.lang` / `<html lang>`). Signed in: avatar + handle; clicking opens a
   menu with **Profile** and **Log out**. Follows `3m4.theme` / `3m4.lang`
   (strings in en/es, falls back to en) and the host's `--accent` when present.
 - Also exposes `window.m4session`:

@@ -6,8 +6,10 @@
  *   <script src="https://accounts.3m4.net/session.js" data-mount="#session" defer></script>
  *
  * Signed out: "Log in · Sign up" links to the hosted pages with
- * return_to=location.href. Signed in: avatar + handle; clicking opens a menu
- * with Profile and Log out. Strings follow `3m4.lang` (en / es), the theme
+ * return_to=location.href and lang=<host's 3m4.lang> so accounts opens in the
+ * viewer's language (localStorage is per origin). Signed in: avatar + handle;
+ * clicking opens a menu with Profile and Log out. Strings follow `3m4.lang`
+ * (en / es), the theme
  * follows `3m4.theme` / prefers-color-scheme, and the host's `--accent` CSS
  * variable is used when present. Also exposes `window.m4session`.
  *
@@ -53,14 +55,19 @@ const STRINGS = {
     const api = origin + "/api";
 
     // ---- strings / theme ---------------------------------------------------
-    const lang = (): keyof typeof STRINGS => {
+    // The host's locale (`3m4.lang`, else <html lang>), e.g. "es-MX"; "" when unknown.
+    const hostLang = (): string => {
       let l = "";
       try {
         l = localStorage.getItem("3m4.lang") || "";
       } catch {
         /* storage unavailable */
       }
-      l = (l || document.documentElement.lang || navigator.language || "en").slice(0, 2);
+      l = (l || document.documentElement.lang || "").trim();
+      return /^[a-z]{2}(-[a-z0-9]{2,8})?$/i.test(l) ? l : "";
+    };
+    const lang = (): keyof typeof STRINGS => {
+      const l = (hostLang() || navigator.language || "en").slice(0, 2);
       return l === "es" ? "es" : "en";
     };
     const t = (k: keyof typeof STRINGS.en) => STRINGS[lang()][k];
@@ -131,8 +138,11 @@ const STRINGS = {
     };
 
     const here = () => location.href;
-    const page = (path: string, returnTo?: string) =>
-      origin + path + "?return_to=" + encodeURIComponent(returnTo || here());
+    // Hosted page URL: return_to + the host's language (accounts validates it).
+    const page = (path: string, returnTo?: string) => {
+      const l = hostLang();
+      return origin + path + "?return_to=" + encodeURIComponent(returnTo || here()) + (l ? "&lang=" + encodeURIComponent(l) : "");
+    };
     const login = (rt?: string) => location.assign(page("/login", rt));
     const signup = (rt?: string) => location.assign(page("/signup", rt));
     const profile = () => location.assign(page("/profile"));

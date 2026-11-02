@@ -3,7 +3,7 @@ import { Link, useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { api, ApiRequestError } from "../../../lib/api";
 import { FeaturesContext } from "../../../lib/features";
 import { setSessionUser } from "../../../lib/session";
-import { goTo, readReturnTo, withReturnTo } from "../../../lib/returnTo";
+import { goTo, readLang, readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture, identify } from "../../../lib/analytics";
 import { tr, trError, useI18n } from "../../../i18n";
 
@@ -17,6 +17,7 @@ export default component$(() => {
   const i18n = useI18n();
   const features = useContext(FeaturesContext);
   const returnTo = readReturnTo(loc.url);
+  const lang = readLang(loc.url);
   const token = loc.url.searchParams.get("token") || "";
   const state = useStore({
     email: loc.url.searchParams.get("email") || "",
@@ -68,7 +69,7 @@ export default component$(() => {
       <div class="card p-8 text-center">
         <h1 class="text-2xl font-bold text-slate-900">{tr(i18n, "auth.magicTitle")}</h1>
         <p class="mt-3 text-sm text-slate-500">{tr(i18n, "auth.magicDisabled")}</p>
-        <Link href={withReturnTo("/login", returnTo)} class="btn-primary mt-6 w-full">
+        <Link href={withReturnTo("/login", returnTo, { lang })} class="btn-primary mt-6 w-full">
           {tr(i18n, "auth.backToLogin")}
         </Link>
       </div>
@@ -80,7 +81,7 @@ export default component$(() => {
       <div class="card p-8 text-center" data-testid="magic-sent">
         <h1 class="text-2xl font-bold text-slate-900">{tr(i18n, "auth.magicSentTitle")}</h1>
         <p class="mt-3 text-sm text-slate-500">{tr(i18n, "auth.magicSentBody", { email: state.email })}</p>
-        <Link href={withReturnTo("/login", returnTo)} class="btn-ghost mt-6 w-full">
+        <Link href={withReturnTo("/login", returnTo, { lang })} class="btn-ghost mt-6 w-full">
           {tr(i18n, "auth.backToLogin")}
         </Link>
       </div>
@@ -117,7 +118,7 @@ export default component$(() => {
         </button>
       </form>
       <p class="mt-6 text-center text-sm text-slate-500">
-        <Link href={withReturnTo("/login", returnTo)} class="font-medium text-primary-600 hover:underline">
+        <Link href={withReturnTo("/login", returnTo, { lang })} class="font-medium text-primary-600 hover:underline">
           {tr(i18n, "auth.backToLogin")}
         </Link>
       </p>
