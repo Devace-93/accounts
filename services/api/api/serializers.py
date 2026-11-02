@@ -41,6 +41,7 @@ def serialize_user(user) -> dict:
         "handle": user.handle,
         "name": user.name,
         "avatar_url": avatar_url(user.id, user.avatar_version),
+        "preferred_currency": user.preferred_currency,
         "created_at": iso(user.created_at),
     }
 

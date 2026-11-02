@@ -1,5 +1,5 @@
-"""Me blueprint: the signed-in user's profile (name, handle, password, avatar,
-linked providers)."""
+"""Me blueprint: the signed-in user's profile (name, handle, preferred
+currency, password, avatar, linked providers)."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -8,6 +8,7 @@ from flask import Blueprint, Response, g, jsonify, request
 from sqlalchemy import select, update
 
 from dbcore import avatars, handles
+from dbcore.config import config
 from dbcore.db import session_scope
 from dbcore.mail_templates import pick_lang
 from dbcore.models import Avatar, Identity, Session, User
@@ -22,6 +23,24 @@ from ..serializers import json_body, serialize_identity, serialize_user
 bp = Blueprint("me", __name__)
 
 CSRF_HEADER_VALUE = "3m4"
+
+
+def clean_currency(value) -> str | None:
+    """``preferred_currency`` from a PATCH body: ``None`` / ``""`` clears it;
+    anything else must be one of ``ALLOWED_CURRENCIES`` (case-insensitive,
+    stored lowercase)."""
+    if value is None or value == "":
+        return None
+    if not isinstance(value, str):
+        raise ApiError(400, "invalid_currency", "Preferred currency must be a string or null.")
+    code = value.strip().lower()
+    if code not in config.allowed_currencies:
+        raise ApiError(
+            400,
+            "invalid_currency",
+            f"Preferred currency must be one of: {', '.join(config.allowed_currencies)}.",
+        )
+    return code
 
 
 def _load(session) -> User:
@@ -65,6 +84,8 @@ def patch_me():
             if handle != user.handle and handles.is_taken(session, handle, exclude_user_id=user.id):
                 raise ApiError(409, "handle_taken", "That handle is already taken.")
             user.handle = handle
+        if "preferred_currency" in data:
+            user.preferred_currency = clean_currency(data.get("preferred_currency"))
         session.flush()
         body = {"user": serialize_user(user)}
     return jsonify(body)

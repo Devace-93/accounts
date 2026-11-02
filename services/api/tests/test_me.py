@@ -1,6 +1,6 @@
 import io
 
-from conftest import outbox_rows
+from conftest import cookie, outbox_rows
 from PIL import Image
 
 from dbcore.db import session_scope
@@ -123,3 +123,41 @@ def test_unlink_identity_guard(client, signup):
     with session_scope() as s:
         s.add(Identity(user_id=user["id"], provider="discord", provider_user_id="d1"))
     assert client.delete("/api/me/identities/google").status_code == 204
+
+
+def test_preferred_currency_patch_validation_and_claim(client, signup):
+    """``preferred_currency`` is validated against ALLOWED_CURRENCIES, stored
+    lowercase, exposed by /me and /session, and travels as the optional
+    ``currency`` JWT claim on the next issued access token."""
+    import jwt
+
+    signup()
+    assert client.get("/api/me").get_json()["user"]["preferred_currency"] is None
+    first = cookie(client, "3m4_session").value
+    assert "currency" not in jwt.decode(first, options={"verify_signature": False})
+
+    r = client.patch("/api/me", json={"preferred_currency": "gbp"})
+    assert r.status_code == 400 and r.get_json()["error"]["code"] == "invalid_currency"
+    r = client.patch("/api/me", json={"preferred_currency": 123})
+    assert r.status_code == 400 and r.get_json()["error"]["code"] == "invalid_currency"
+    assert client.get("/api/me").get_json()["user"]["preferred_currency"] is None
+
+    r = client.patch("/api/me", json={"preferred_currency": " MXN "})
+    assert r.status_code == 200 and r.get_json()["user"]["preferred_currency"] == "mxn"
+    assert client.get("/api/session").get_json()["user"]["preferred_currency"] == "mxn"
+    # the access token in hand is unchanged until the next refresh…
+    assert cookie(client, "3m4_session").value == first
+    # …which carries the new claim
+    assert client.post("/api/session/refresh").get_json()["user"]["preferred_currency"] == "mxn"
+    claims = jwt.decode(cookie(client, "3m4_session").value, options={"verify_signature": False})
+    assert claims["currency"] == "mxn"
+
+    # null (or "") clears it and the claim disappears again
+    assert client.patch("/api/me", json={"preferred_currency": None}).get_json()["user"]["preferred_currency"] is None
+    client.post("/api/session/refresh")
+    assert "currency" not in jwt.decode(cookie(client, "3m4_session").value, options={"verify_signature": False})
+    assert client.patch("/api/me", json={"preferred_currency": "EUR"}).get_json()["user"]["preferred_currency"] == "eur"
+    assert client.patch("/api/me", json={"preferred_currency": ""}).get_json()["user"]["preferred_currency"] is None
+    # untouched when the key is absent
+    client.patch("/api/me", json={"preferred_currency": "usd"})
+    assert client.patch("/api/me", json={"name": "Ana"}).get_json()["user"]["preferred_currency"] == "usd"

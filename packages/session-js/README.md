@@ -32,8 +32,9 @@ service at `https://accounts.3m4.net/session.js`.
 | `logout()` | `POST /api/session/logout` with credentials, then notifies |
 | `origin` | the accounts origin the widget talks to |
 
-`User` is `{ id, email, email_verified, handle, name, avatar_url }` (see
-`CONTRACT.md`). Requests go to `GET /api/session` with `credentials: "include"`;
+`User` is `{ id, email, email_verified, handle, name, avatar_url,
+preferred_currency? }` (see `CONTRACT.md`; `preferred_currency` is a lowercase
+ISO 4217 code such as `"mxn"`, or `null` when the user never picked one). Requests go to `GET /api/session` with `credentials: "include"`;
 on `401 session_expired` one `POST /api/session/refresh` is attempted. Nothing
 in here throws into the host page.
 

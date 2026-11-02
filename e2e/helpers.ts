@@ -19,6 +19,7 @@ export interface User {
   handle: string;
   name: string | null;
   avatar_url: string;
+  preferred_currency: string | null;
   created_at: string;
 }
 

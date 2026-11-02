@@ -18,6 +18,8 @@ export interface SessionUser {
   handle: string;
   name: string | null;
   avatar_url: string;
+  /** Lowercase ISO 4217 (usd | mxn | eur); null / absent when never set. Same value as the `currency` JWT claim. */
+  preferred_currency?: string | null;
   created_at?: string;
 }
 

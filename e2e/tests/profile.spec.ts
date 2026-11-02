@@ -3,9 +3,9 @@ import { BASE_URL } from "../playwright.config";
 import { PASSWORD, TINY_PNG, currentSession, login, loginViaUi, signup, uniqueHandle } from "../helpers";
 
 /**
- * The /profile page: name + handle edits, avatar upload / removal (served as
- * WebP, then back to the generated SVG), password change revoking the other
- * sessions, and the session list.
+ * The /profile page: name + handle + preferred-currency edits, avatar upload /
+ * removal (served as WebP, then back to the generated SVG), password change
+ * revoking the other sessions, and the session list.
  */
 test.describe("profile", () => {
   test("@critical edits the name and the handle", async ({ page, request }) => {
@@ -14,8 +14,10 @@ test.describe("profile", () => {
     await expect(page).toHaveURL(/\/profile\/?(\?.*)?$/);
 
     const handle = uniqueHandle("renamed");
+    await expect(page.getByTestId("currency")).toHaveValue("");
     await page.getByTestId("name").fill("Ana López");
     await page.getByTestId("handle").fill(handle);
+    await page.getByTestId("currency").selectOption("mxn");
     // Wait for the PATCH to land before reading the session back.
     await Promise.all([
       page.waitForResponse((r) => r.url().includes("/api/me") && r.request().method() === "PATCH"),
@@ -26,10 +28,12 @@ test.describe("profile", () => {
     const me = await currentSession(page.request);
     expect(me?.name).toBe("Ana López");
     expect(me?.handle).toBe(handle);
+    expect(me?.preferred_currency).toBe("mxn");
 
     await page.reload();
     await expect(page.getByTestId("name")).toHaveValue("Ana López");
     await expect(page.getByTestId("handle")).toHaveValue(handle);
+    await expect(page.getByTestId("currency")).toHaveValue("mxn");
 
     // A reserved handle is refused inline.
     await page.getByTestId("handle").fill("admin");

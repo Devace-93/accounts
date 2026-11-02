@@ -127,7 +127,7 @@ export const api = {
 
   /* ─── Me ───────────────────────────────────────────────────────────── */
   me: () => apiFetch<Me>("/me"),
-  updateMe: (data: { name?: string; handle?: string }) =>
+  updateMe: (data: { name?: string; handle?: string; preferred_currency?: string | null }) =>
     apiFetch<{ user: User }>("/me", { method: "PATCH", body: data }),
   setPassword: (new_password: string, current_password?: string) =>
     apiFetch<void>("/me/password", { method: "PUT", body: { new_password, current_password } }),
