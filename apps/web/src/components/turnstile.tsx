@@ -55,8 +55,11 @@ export const Turnstile = component$<Props>(({ token, ready, required, theme = "a
   const container = useSignal<HTMLDivElement>();
   const siteKey = useSignal<string | null>(null);
 
+  // `document-ready`: the container starts hidden, and the default strategy
+  // (IntersectionObserver) never fires for a hidden element.
   // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(async () => {
+  useVisibleTask$(
+    async () => {
     let key: string | null = null;
     try {
       key = (await api.providers()).turnstile_site_key ?? null;
@@ -66,7 +69,12 @@ export const Turnstile = component$<Props>(({ token, ready, required, theme = "a
     siteKey.value = key;
     required.value = !!key;
     ready.value = true;
-    if (!key || !container.value) return;
+    if (!key) return;
+    if (!container.value) {
+      // Should not happen (the container is always rendered); never lock the form.
+      required.value = false;
+      return;
+    }
     try {
       const ts = await loadTurnstile();
       ts.render(container.value, {
@@ -91,8 +99,12 @@ export const Turnstile = component$<Props>(({ token, ready, required, theme = "a
       // leaves no token. Let the submit go through and the API decide.
       required.value = false;
     }
-  });
+    },
+    { strategy: "document-ready" },
+  );
 
-  if (siteKey.value === null) return null;
-  return <div ref={container} data-testid="turnstile" class="min-h-[65px]" />;
+  // The container is always in the DOM so the visible task can render into it
+  // right after it learns the site key (a conditional element would not exist
+  // yet at that point and the widget would never load). Hidden until needed.
+  return <div ref={container} data-testid="turnstile" class={siteKey.value ? "min-h-[65px]" : "hidden"} />;
 });
