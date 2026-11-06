@@ -71,6 +71,7 @@ export const auth = {
   "auth.err.email_taken": "An account with that email already exists. Log in instead.",
   "auth.err.handle_taken": "That handle is already taken.",
   "auth.err.signups_disabled": "Sign-ups are closed right now.",
+  "auth.err.captcha_failed": "The anti-bot check failed. Please try again.",
   "auth.err.invalid_credentials": "Email or password is incorrect.",
   "auth.err.invalid_token": "This link is not valid.",
   "auth.err.expired_token": "This link has expired.",

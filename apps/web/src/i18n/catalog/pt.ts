@@ -100,6 +100,7 @@ const pt: PartialCatalog = {
   "auth.err.email_taken": "Já existe uma conta com esse e-mail. Entre.",
   "auth.err.handle_taken": "Esse nome de usuário já está em uso.",
   "auth.err.signups_disabled": "O cadastro está fechado no momento.",
+  "auth.err.captcha_failed": "A verificação anti-bot falhou. Tente novamente.",
   "auth.err.invalid_credentials": "E-mail ou senha incorretos.",
   "auth.err.invalid_token": "Este link não é válido.",
   "auth.err.expired_token": "Este link expirou.",

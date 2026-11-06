@@ -73,7 +73,7 @@ def test_login_without_password_set_is_invalid_credentials(client):
 
 
 def test_providers_empty_when_unconfigured(client):
-    assert client.get("/api/auth/providers").get_json() == {"providers": []}
+    assert client.get("/api/auth/providers").get_json() == {"providers": [], "turnstile_site_key": None}
     r = client.get("/api/auth/oauth/google/start")
     assert r.status_code == 404 and r.get_json()["error"]["code"] == "provider_not_configured"
     assert client.get("/api/auth/oauth/facebook/start").get_json()["error"]["code"] == "unknown_provider"
@@ -82,3 +82,82 @@ def test_providers_empty_when_unconfigured(client):
 def test_features_public(client):
     f = client.get("/api/features").get_json()["features"]
     assert f["signups"] is True and f["site-building"] is False and f["oauth"] is True and f["magic-link"] is True
+
+
+# --------------------------------------------------------------------------- #
+# Turnstile (anti-bot challenge on signup + magic)
+
+
+def _enable_turnstile(monkeypatch, verify_result):
+    from dbcore import turnstile
+
+    monkeypatch.setattr(turnstile, "configured", lambda: True)
+    monkeypatch.setattr(turnstile, "site_key", lambda: "1x00000000000000000000AA")
+    calls = []
+
+    def fake_verify(token, remote_ip=None):
+        calls.append((token, remote_ip))
+        return verify_result
+
+    monkeypatch.setattr(turnstile, "verify", fake_verify)
+    return calls
+
+
+def test_captcha_off_by_default(client):
+    resp = client.get("/api/auth/providers")
+    assert resp.status_code == 200
+    assert resp.get_json()["turnstile_site_key"] is None
+
+
+def test_signup_and_magic_require_captcha_when_configured(client, monkeypatch):
+    calls = _enable_turnstile(monkeypatch, verify_result=False)
+    assert client.get("/api/auth/providers").get_json()["turnstile_site_key"] == "1x00000000000000000000AA"
+
+    resp = client.post("/api/auth/signup", json={"email": "bot@example.com", "password": "correct horse battery"})
+    assert resp.status_code == 400
+    assert resp.get_json()["error"]["code"] == "captcha_failed"
+    assert calls == [(None, None)] or calls[0][0] is None
+
+    resp = client.post("/api/auth/magic", json={"email": "bot@example.com", "turnstile_token": "bad"})
+    assert resp.status_code == 400
+    assert resp.get_json()["error"]["code"] == "captcha_failed"
+    assert outbox_rows() == []
+
+
+def test_signup_passes_with_valid_captcha(client, monkeypatch):
+    calls = _enable_turnstile(monkeypatch, verify_result=True)
+    resp = client.post(
+        "/api/auth/signup",
+        json={"email": "ana@example.com", "password": "correct horse battery", "turnstile_token": "tok"},
+    )
+    assert resp.status_code == 201, resp.get_json()
+    assert calls[0][0] == "tok"
+
+
+def test_captcha_fails_open_when_cloudflare_unreachable(client, monkeypatch):
+    _enable_turnstile(monkeypatch, verify_result=None)
+    resp = client.post("/api/auth/magic", json={"email": "ana@example.com"})
+    assert resp.status_code == 202
+
+
+def test_proxy_fix_uses_forwarded_client_address(app):
+    """The app is wrapped in ProxyFix for exactly one trusted proxy (Caddy)."""
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+    assert isinstance(app.wsgi_app, ProxyFix)
+    assert (app.wsgi_app.x_for, app.wsgi_app.x_proto, app.wsgi_app.x_host) == (1, 1, 1)
+
+    seen = {}
+
+    def inner(environ, start_response):
+        seen["ip"] = environ["REMOTE_ADDR"]
+        start_response("204 No Content", [])
+        return [b""]
+
+    from werkzeug.test import Client
+
+    c = Client(ProxyFix(inner, x_for=1, x_proto=1, x_host=1))
+    c.get("/", headers={"X-Forwarded-For": "203.0.113.9"}, environ_base={"REMOTE_ADDR": "10.0.0.2"})
+    assert seen["ip"] == "203.0.113.9"
+    c.get("/", environ_base={"REMOTE_ADDR": "10.0.0.2"})
+    assert seen["ip"] == "10.0.0.2"

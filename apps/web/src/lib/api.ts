@@ -102,15 +102,21 @@ export function oauthStartUrl(provider: Provider, returnTo: string, link = false
 export const api = {
   /* ─── Public ───────────────────────────────────────────────────────── */
   features: () => apiFetch<{ features: Record<string, boolean> }>("/features"),
-  providers: () => apiFetch<{ providers: Provider[] }>("/auth/providers"),
+  providers: () => apiFetch<{ providers: Provider[]; turnstile_site_key?: string | null }>("/auth/providers"),
 
   /* ─── Auth ─────────────────────────────────────────────────────────── */
-  signup: (data: { email: string; password: string; handle?: string; name?: string; lang?: string }) =>
-    apiFetch<{ user: User }>("/auth/signup", { method: "POST", body: data }),
+  signup: (data: {
+    email: string;
+    password: string;
+    handle?: string;
+    name?: string;
+    lang?: string;
+    turnstile_token?: string;
+  }) => apiFetch<{ user: User }>("/auth/signup", { method: "POST", body: data }),
   login: (email: string, password: string) =>
     apiFetch<{ user: User }>("/auth/login", { method: "POST", body: { email, password } }),
-  magic: (email: string, return_to?: string, lang?: string) =>
-    apiFetch<Record<string, never>>("/auth/magic", { method: "POST", body: { email, return_to, lang } }),
+  magic: (email: string, return_to?: string, lang?: string, turnstile_token?: string) =>
+    apiFetch<Record<string, never>>("/auth/magic", { method: "POST", body: { email, return_to, lang, turnstile_token } }),
   magicConsume: (token: string) =>
     apiFetch<{ user: User }>("/auth/magic/consume", { method: "POST", body: { token } }),
   verifyConsume: (token: string) =>

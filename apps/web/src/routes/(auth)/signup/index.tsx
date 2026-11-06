@@ -7,6 +7,7 @@ import { goTo, readLang, readReturnTo, withReturnTo } from "../../../lib/returnT
 import { capture, identify } from "../../../lib/analytics";
 import { PasswordField } from "../../../components/password-field";
 import { ProviderButtons } from "../../../components/provider-buttons";
+import { Turnstile } from "../../../components/turnstile";
 import { tr, trError, useI18n } from "../../../i18n";
 
 /** CONTRACT.md → Objects → handle. */
@@ -42,6 +43,9 @@ export default component$(() => {
 
   const password = useSignal("");
   const confirm = useSignal("");
+  const captcha = useSignal("");
+  const captchaReady = useSignal(false);
+  const captchaRequired = useSignal(false);
   const state = useStore({
     email: "",
     handle: "",
@@ -64,6 +68,7 @@ export default component$(() => {
   const canSubmit = useComputed$(
     () =>
       !state.loading &&
+      !captchaRequired.value &&
       state.email.includes("@") &&
       password.value.length >= MIN_PASSWORD &&
       confirm.value === password.value &&
@@ -82,6 +87,7 @@ export default component$(() => {
         handle: state.handle || undefined,
         name: state.name.trim() || undefined,
         lang: i18n.lang,
+        turnstile_token: captcha.value || undefined,
       });
       setSessionUser(res.user);
       identify(res.user.id);
@@ -203,6 +209,7 @@ export default component$(() => {
           error={mismatch.value ? tr(i18n, "auth.passwordsMismatch") : undefined}
           onBlur$={() => (state.confirmTouched = true)}
         />
+        <Turnstile token={captcha} ready={captchaReady} required={captchaRequired} />
         <button type="submit" class="btn-primary w-full" disabled={!canSubmit.value} data-testid="submit">
           {state.loading ? tr(i18n, "auth.creatingAccount") : tr(i18n, "auth.createAccount")}
         </button>

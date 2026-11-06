@@ -105,13 +105,13 @@ Compose project name `accounts`. Frontend tooling is Bun. Brand colour: Tailwind
 ### Auth
 | Method | Path | Body / query | Response |
 |---|---|---|---|
-| POST | `/auth/signup` | `{email, password, handle?, name?, lang?}` | 201 `{user}` + cookies; queues the verification mail. 400 `invalid_email` / `weak_password` (< 8 chars) / `invalid_handle` / `reserved_handle`, 409 `email_taken` / `handle_taken`, 403 `signups_disabled` |
+| POST | `/auth/signup` | `{email, password, handle?, name?, lang?, turnstile_token?}` | 201 `{user}` + cookies; queues the verification mail. 400 `invalid_email` / `weak_password` (< 8 chars) / `invalid_handle` / `reserved_handle` / `captcha_failed` (see Spam protection), 409 `email_taken` / `handle_taken`, 403 `signups_disabled` |
 | POST | `/auth/login` | `{email, password}` | 200 `{user}` + cookies. 401 `invalid_credentials` (same answer for unknown email, no password set, wrong password; constant-time) |
-| POST | `/auth/magic` | `{email, return_to?, lang?}` | 202 `{}` always (no enumeration). Queues a mail with `https://accounts.3m4.net/magic?token=…&return_to=…` when the email exists; unknown emails get a "no account yet, sign up" mail |
+| POST | `/auth/magic` | `{email, return_to?, lang?, turnstile_token?}` | 202 `{}` always (no enumeration); 400 `captcha_failed` when the challenge is on and the token is missing or invalid. Queues a mail with `https://accounts.3m4.net/magic?token=…&return_to=…` when the email exists; unknown emails get a "no account yet, sign up" mail |
 | POST | `/auth/magic/consume` | `{token}` | 200 `{user, return_to}` + cookies; marks the email verified. `return_to` is the safe-guarded value stored with the token (default `/profile`). 400 `invalid_token` / `expired_token` / `used_token` |
 | POST | `/auth/verify/consume` | `{token}` | 200 `{user, return_to}`; sets `email_verified_at`. When the caller already holds a session for that same user (the usual case: the mail link opened in the browser that signed up) the response re-issues both cookies, so the JWT carries `email_verified: true` immediately instead of at the next refresh. A caller without a session is not logged in. Same errors as above |
 | POST | `/auth/verify/resend` | `{lang?}` (session) | 202 `{}`; 429 after 3/hour; 409 `already_verified` |
-| GET | `/auth/providers` | — | `{providers: ["google","github","discord"]}` (only those configured) |
+| GET | `/auth/providers` | — | `{providers: ["google","github","discord"], turnstile_site_key: string | null}` (only the providers configured; the site key is null while the challenge is off) |
 | GET | `/auth/oauth/<provider>/start` | `?return_to=&link=1` | 302 to the provider; `state` (+ PKCE for providers that support it) kept in a signed, short-lived `3m4_oauth` cookie. `link=1` requires a session and links the identity to it instead of logging in |
 | GET | `/auth/oauth/<provider>/callback` | provider params | 302 to `return_to` (default `/profile`) with cookies set. On failure 302 to `/login?error=oauth_failed&provider=`. New identity + unknown email ⇒ user created (handle derived from the provider login/name, de-duplicated with a numeric suffix; email verified when the provider says so). New identity + known email ⇒ **linked only if the provider reports the email verified**, else `oauth_email_unverified` |
 
@@ -153,6 +153,22 @@ of the same kind.
 signup 5/min · login 10/min · magic 3/min and 5/hour per email · verify resend
 3/hour per user · avatar upload 10/hour per user · session refresh 60/min ·
 default 120/min.
+
+The client IP is the first `X-Forwarded-For` hop set by the one trusted proxy
+in front of the API (Caddy; `ProxyFix(x_for=1)`). Caddy drops `X-Forwarded-*`
+headers sent by clients, so the address cannot be spoofed.
+
+### Spam protection: Cloudflare Turnstile (optional, site-wide)
+Set `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET` to require a Turnstile challenge
+on the two anonymous write endpoints that send mail to arbitrary addresses:
+`POST /auth/signup` and `POST /auth/magic`. The pages read the site key from
+`GET /auth/providers`, render the widget and send its response as
+`turnstile_token`; the API verifies it with Cloudflare's siteverify (5 s
+timeout, `remoteip` included). Missing / invalid token → 400 `captcha_failed`.
+If Cloudflare itself is unreachable the request is accepted and logged
+(fail-open): a third-party outage must never close sign-up. Login, OAuth and
+the session routes are never challenged. Both keys empty → off (the default,
+and the self-host default).
 
 ## Objects
 

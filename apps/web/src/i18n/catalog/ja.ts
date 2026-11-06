@@ -99,6 +99,7 @@ const ja: PartialCatalog = {
   "auth.err.email_taken": "このメールアドレスのアカウントはすでに存在します。ログインしてください。",
   "auth.err.handle_taken": "そのユーザー名はすでに使われています。",
   "auth.err.signups_disabled": "現在、新規登録は停止中です。",
+  "auth.err.captcha_failed": "ボット対策の確認に失敗しました。もう一度お試しください。",
   "auth.err.invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
   "auth.err.invalid_token": "このリンクは無効です。",
   "auth.err.expired_token": "このリンクは期限切れです。",

@@ -100,6 +100,7 @@ const ro: PartialCatalog = {
   "auth.err.email_taken": "Există deja un cont cu acest e-mail. Autentifică-te.",
   "auth.err.handle_taken": "Acest nume de utilizator este deja luat.",
   "auth.err.signups_disabled": "Înregistrările sunt închise momentan.",
+  "auth.err.captcha_failed": "Verificarea anti-bot a eșuat. Încearcă din nou.",
   "auth.err.invalid_credentials": "E-mailul sau parola este incorectă.",
   "auth.err.invalid_token": "Acest link nu este valid.",
   "auth.err.expired_token": "Acest link a expirat.",

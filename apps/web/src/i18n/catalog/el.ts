@@ -100,6 +100,7 @@ const el: PartialCatalog = {
   "auth.err.email_taken": "Υπάρχει ήδη λογαριασμός με αυτό το email. Συνδεθείτε.",
   "auth.err.handle_taken": "Αυτό το όνομα χρήστη χρησιμοποιείται ήδη.",
   "auth.err.signups_disabled": "Οι εγγραφές είναι προς το παρόν κλειστές.",
+  "auth.err.captcha_failed": "Ο έλεγχος κατά των bot απέτυχε. Προσπαθήστε ξανά.",
   "auth.err.invalid_credentials": "Λάθος email ή κωδικός.",
   "auth.err.invalid_token": "Αυτός ο σύνδεσμος δεν είναι έγκυρος.",
   "auth.err.expired_token": "Αυτός ο σύνδεσμος έχει λήξει.",

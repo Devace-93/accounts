@@ -100,6 +100,7 @@ const uk: PartialCatalog = {
   "auth.err.email_taken": "Обліковий запис із цією поштою вже існує. Увійдіть.",
   "auth.err.handle_taken": "Це ім'я користувача вже зайняте.",
   "auth.err.signups_disabled": "Реєстрацію зараз закрито.",
+  "auth.err.captcha_failed": "Перевірку на бота не пройдено. Спробуйте ще раз.",
   "auth.err.invalid_credentials": "Неправильна пошта або пароль.",
   "auth.err.invalid_token": "Це посилання недійсне.",
   "auth.err.expired_token": "Термін дії цього посилання минув.",

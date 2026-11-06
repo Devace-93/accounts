@@ -100,6 +100,7 @@ const cs: PartialCatalog = {
   "auth.err.email_taken": "Účet s tímto e-mailem už existuje. Přihlaste se.",
   "auth.err.handle_taken": "Toto uživatelské jméno je už zabrané.",
   "auth.err.signups_disabled": "Registrace je momentálně uzavřená.",
+  "auth.err.captcha_failed": "Ověření proti robotům selhalo. Zkuste to znovu.",
   "auth.err.invalid_credentials": "E-mail nebo heslo je nesprávné.",
   "auth.err.invalid_token": "Tento odkaz není platný.",
   "auth.err.expired_token": "Platnost tohoto odkazu vypršela.",

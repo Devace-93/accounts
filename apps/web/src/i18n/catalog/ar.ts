@@ -100,6 +100,7 @@ const ar: PartialCatalog = {
   "auth.err.email_taken": "يوجد حساب بهذا البريد بالفعل. سجّل الدخول بدلًا من ذلك.",
   "auth.err.handle_taken": "اسم المستخدم هذا مستخدم بالفعل.",
   "auth.err.signups_disabled": "التسجيل مغلق حاليًا.",
+  "auth.err.captcha_failed": "فشل التحقق من أنك لست روبوتًا. حاول مرة أخرى.",
   "auth.err.invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
   "auth.err.invalid_token": "هذا الرابط غير صالح.",
   "auth.err.expired_token": "انتهت صلاحية هذا الرابط.",

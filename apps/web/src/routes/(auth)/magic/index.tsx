@@ -1,4 +1,4 @@
-import { component$, useContext, useStore, useVisibleTask$, $ } from "@builder.io/qwik";
+import { component$, useContext, useSignal, useStore, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Link, useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { api, ApiRequestError } from "../../../lib/api";
 import { FeaturesContext } from "../../../lib/features";
@@ -6,6 +6,7 @@ import { setSessionUser } from "../../../lib/session";
 import { goTo, readLang, readReturnTo, withReturnTo } from "../../../lib/returnTo";
 import { capture, identify } from "../../../lib/analytics";
 import { tr, trError, useI18n } from "../../../i18n";
+import { Turnstile } from "../../../components/turnstile";
 
 /**
  * Magic link: without `?token=` it is the request form; with a token it POSTs
@@ -19,6 +20,9 @@ export default component$(() => {
   const returnTo = readReturnTo(loc.url);
   const lang = readLang(loc.url);
   const token = loc.url.searchParams.get("token") || "";
+  const captcha = useSignal("");
+  const captchaReady = useSignal(false);
+  const captchaRequired = useSignal(false);
   const state = useStore({
     email: loc.url.searchParams.get("email") || "",
     phase: (token ? "consuming" : "form") as "form" | "sending" | "sent" | "consuming",
@@ -46,7 +50,7 @@ export default component$(() => {
     state.error = "";
     state.phase = "sending";
     try {
-      await api.magic(state.email.trim(), returnTo, i18n.lang);
+      await api.magic(state.email.trim(), returnTo, i18n.lang, captcha.value || undefined);
       state.phase = "sent";
     } catch (e) {
       state.phase = "form";
@@ -113,7 +117,13 @@ export default component$(() => {
             onInput$={(_, el) => (state.email = el.value)}
           />
         </div>
-        <button type="submit" class="btn-primary w-full" disabled={state.phase === "sending"} data-testid="submit">
+        <Turnstile token={captcha} ready={captchaReady} required={captchaRequired} />
+        <button
+          type="submit"
+          class="btn-primary w-full"
+          disabled={state.phase === "sending" || captchaRequired.value}
+          data-testid="submit"
+        >
           {state.phase === "sending" ? tr(i18n, "auth.magicSending") : tr(i18n, "auth.magicSend")}
         </button>
       </form>

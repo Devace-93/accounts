@@ -100,6 +100,7 @@ const sv: PartialCatalog = {
   "auth.err.email_taken": "Det finns redan ett konto med den e-posten. Logga in i stället.",
   "auth.err.handle_taken": "Det användarnamnet är redan taget.",
   "auth.err.signups_disabled": "Registreringen är stängd just nu.",
+  "auth.err.captcha_failed": "Bot-kontrollen misslyckades. Försök igen.",
   "auth.err.invalid_credentials": "E-post eller lösenord är felaktigt.",
   "auth.err.invalid_token": "Den här länken är inte giltig.",
   "auth.err.expired_token": "Den här länken har gått ut.",
