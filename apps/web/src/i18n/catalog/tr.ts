@@ -100,6 +100,7 @@ const tr: PartialCatalog = {
   "auth.err.email_taken": "Bu e-postayla bir hesap zaten var. Giriş yapın.",
   "auth.err.handle_taken": "Bu kullanıcı adı zaten alınmış.",
   "auth.err.signups_disabled": "Kayıtlar şu anda kapalı.",
+  "auth.err.captcha_failed": "Bot doğrulaması başarısız oldu. Lütfen tekrar deneyin.",
   "auth.err.invalid_credentials": "E-posta veya parola hatalı.",
   "auth.err.invalid_token": "Bu bağlantı geçerli değil.",
   "auth.err.expired_token": "Bu bağlantının süresi doldu.",

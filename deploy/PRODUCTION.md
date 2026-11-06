@@ -137,6 +137,21 @@ Rules:
 
    After editing `.env`: `docker compose ... up -d api web` and check
    `curl -sS https://accounts.3m4.net/api/auth/providers`.
+7b. **Spam protection (Turnstile)** — sign-up and magic-link forms send
+   mail to any address a visitor types, so they attract bots. Create a
+   Turnstile widget (Cloudflare dashboard → Turnstile → Add widget, hostname
+   `accounts.3m4.net`, mode *Managed*; a free Cloudflare account is enough, the
+   DNS stays at Bluehost), then put both keys in `.env`:
+
+   ```
+   TURNSTILE_SITE_KEY=0x4AAAAAAA...
+   TURNSTILE_SECRET=0x4AAAAAAA...
+   ```
+
+   and `up -d api` (the pages pick the site key up at runtime). Both empty =
+   no challenge. Test keys: site `1x00000000000000000000AA` + secret
+   `1x0000000000000000000000000000000AA` always pass.
+
 8. **Facebook** (later, for sharing from the games): needs a Meta developer
    app, *Facebook Login* product, business verification and app review before
    non-testers can log in. Out of scope for phase 1; the provider table in the

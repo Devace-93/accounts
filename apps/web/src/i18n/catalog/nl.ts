@@ -100,6 +100,7 @@ const nl: PartialCatalog = {
   "auth.err.email_taken": "Er bestaat al een account met dit e-mailadres. Log in.",
   "auth.err.handle_taken": "Die gebruikersnaam is al bezet.",
   "auth.err.signups_disabled": "Registreren is op dit moment gesloten.",
+  "auth.err.captcha_failed": "De anti-botcontrole is mislukt. Probeer het opnieuw.",
   "auth.err.invalid_credentials": "E-mail of wachtwoord is onjuist.",
   "auth.err.invalid_token": "Deze link is niet geldig.",
   "auth.err.expired_token": "Deze link is verlopen.",

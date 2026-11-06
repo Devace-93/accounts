@@ -10,9 +10,10 @@ import re
 from datetime import datetime, timezone
 
 from flask import Blueprint, g, jsonify, request
+from flask import current_app
 from sqlalchemy import select
 
-from dbcore import email_tokens, handles
+from dbcore import email_tokens, handles, turnstile
 from dbcore.db import session_scope
 from dbcore.feature_flags import is_enabled
 from dbcore.mail_templates import pick_lang
@@ -101,12 +102,30 @@ def queue_verification(session, user: User, lang: str, return_to: str | None = N
                  token=token, return_to=return_to)
 
 
+def check_captcha(data: dict) -> None:
+    """Enforce the Turnstile challenge on the anonymous write endpoints when it
+    is configured (``TURNSTILE_SITE_KEY`` + ``TURNSTILE_SECRET``). A missing or
+    invalid token is 400 ``captcha_failed``. If Cloudflare cannot be reached the
+    request goes through (logged): a third-party outage must never lock the
+    sign-up and magic-link pages."""
+    if not turnstile.configured():
+        return
+    token = data.get("turnstile_token") if isinstance(data.get("turnstile_token"), str) else None
+    result = turnstile.verify(token, request.remote_addr)
+    if result is None:
+        current_app.logger.warning("turnstile unavailable; accepting %s without a challenge", request.path)
+        return
+    if not result:
+        raise ApiError(400, "captcha_failed", "The anti-bot check failed. Please try again.")
+
+
 # --------------------------------------------------------------------------- #
 @bp.post("/signup")
 @limiter.limit("5 per minute")
 @require_feature("signups", code="signups_disabled")
 def signup():
     data = json_body()
+    check_captcha(data)
     email = clean_email(data.get("email"))
     password = validate_password(data.get("password"))
     name = clean_name(data.get("name"))
@@ -155,6 +174,7 @@ def login():
 @require_feature("magic-link")
 def magic():
     data = json_body()
+    check_captcha(data)
     email = clean_email(data.get("email"))
     lang = request_lang(data)
     raw_return = data.get("return_to") if isinstance(data.get("return_to"), str) else None
@@ -248,4 +268,4 @@ def verify_resend():
 @bp.get("/providers")
 def providers():
     enabled = configured_providers() if is_enabled("oauth") else []
-    return jsonify({"providers": enabled})
+    return jsonify({"providers": enabled, "turnstile_site_key": turnstile.site_key()})

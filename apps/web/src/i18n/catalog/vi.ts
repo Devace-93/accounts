@@ -100,6 +100,7 @@ const vi: PartialCatalog = {
   "auth.err.email_taken": "Đã có tài khoản với email này. Hãy đăng nhập.",
   "auth.err.handle_taken": "Tên người dùng này đã được sử dụng.",
   "auth.err.signups_disabled": "Đăng ký hiện đang đóng.",
+  "auth.err.captcha_failed": "Kiểm tra chống bot không thành công. Vui lòng thử lại.",
   "auth.err.invalid_credentials": "Email hoặc mật khẩu không đúng.",
   "auth.err.invalid_token": "Liên kết này không hợp lệ.",
   "auth.err.expired_token": "Liên kết này đã hết hạn.",

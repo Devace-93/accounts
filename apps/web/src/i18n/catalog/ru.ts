@@ -100,6 +100,7 @@ const ru: PartialCatalog = {
   "auth.err.email_taken": "Аккаунт с этой почтой уже существует. Войдите.",
   "auth.err.handle_taken": "Это имя пользователя уже занято.",
   "auth.err.signups_disabled": "Регистрация сейчас закрыта.",
+  "auth.err.captcha_failed": "Проверка на бота не пройдена. Попробуйте ещё раз.",
   "auth.err.invalid_credentials": "Неверная почта или пароль.",
   "auth.err.invalid_token": "Эта ссылка недействительна.",
   "auth.err.expired_token": "Срок действия этой ссылки истёк.",

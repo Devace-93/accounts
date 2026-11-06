@@ -77,6 +77,14 @@ class Config:
     posthog_personal_api_key: str = os.getenv("POSTHOG_PERSONAL_API_KEY", "")
     posthog_flag_prefix: str = os.getenv("POSTHOG_FLAG_PREFIX", "accounts-")
 
+    # Cloudflare Turnstile (anti-bot challenge on signup + magic link). Enabled
+    # when both keys are set; the site key is public (GET /api/auth/providers).
+    turnstile_site_key: str = os.getenv("TURNSTILE_SITE_KEY", "")
+    turnstile_secret: str = os.getenv("TURNSTILE_SECRET", "")
+    turnstile_verify_url: str = os.getenv(
+        "TURNSTILE_VERIFY_URL", "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    )
+
     # rate limiting
     rate_limit_default: str = os.getenv("RATE_LIMIT_DEFAULT", "120/minute")
     rate_limits_enabled: bool = _bool("RATE_LIMITS_ENABLED", True)

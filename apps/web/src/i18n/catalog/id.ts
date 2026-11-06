@@ -100,6 +100,7 @@ const id: PartialCatalog = {
   "auth.err.email_taken": "Akun dengan email itu sudah ada. Silakan masuk.",
   "auth.err.handle_taken": "Nama pengguna itu sudah dipakai.",
   "auth.err.signups_disabled": "Pendaftaran saat ini ditutup.",
+  "auth.err.captcha_failed": "Pemeriksaan anti-bot gagal. Silakan coba lagi.",
   "auth.err.invalid_credentials": "Email atau kata sandi salah.",
   "auth.err.invalid_token": "Tautan ini tidak valid.",
   "auth.err.expired_token": "Tautan ini sudah kedaluwarsa.",

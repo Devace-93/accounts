@@ -16,6 +16,7 @@ from datetime import timedelta
 
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from dbcore.config import config
 from dbcore.origins import matcher
@@ -29,6 +30,13 @@ ALLOW_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 
 def create_app() -> Flask:
     app = Flask(__name__)
+    # One trusted proxy (Caddy) in front: take the client address, scheme and
+    # host from the X-Forwarded-* headers it sets. Without this every request
+    # has Caddy's container IP as ``remote_addr`` and the per-IP rate limits
+    # become one shared bucket. Caddy >= 2.5 drops X-Forwarded-* headers that
+    # clients send unless they come from a configured trusted proxy, so the
+    # first hop is the real client.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # type: ignore[method-assign]
     app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
     app.config["SECRET_KEY"] = config.secret_key
     # Flask's signed cookie session is used ONLY to carry OAuth state between

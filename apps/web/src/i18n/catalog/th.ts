@@ -99,6 +99,7 @@ const th: PartialCatalog = {
   "auth.err.email_taken": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว กรุณาเข้าสู่ระบบ",
   "auth.err.handle_taken": "ชื่อผู้ใช้นี้ถูกใช้แล้ว",
   "auth.err.signups_disabled": "ขณะนี้ปิดรับสมัคร",
+  "auth.err.captcha_failed": "การตรวจสอบป้องกันบอตล้มเหลว กรุณาลองอีกครั้ง",
   "auth.err.invalid_credentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
   "auth.err.invalid_token": "ลิงก์นี้ไม่ถูกต้อง",
   "auth.err.expired_token": "ลิงก์นี้หมดอายุแล้ว",

@@ -99,6 +99,7 @@ const zh: PartialCatalog = {
   "auth.err.email_taken": "该邮箱已注册账户，请直接登录。",
   "auth.err.handle_taken": "该用户名已被占用。",
   "auth.err.signups_disabled": "目前已关闭注册。",
+  "auth.err.captcha_failed": "防机器人验证失败，请重试。",
   "auth.err.invalid_credentials": "邮箱或密码不正确。",
   "auth.err.invalid_token": "此链接无效。",
   "auth.err.expired_token": "此链接已过期。",

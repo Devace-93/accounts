@@ -100,6 +100,7 @@ const hi: PartialCatalog = {
   "auth.err.email_taken": "इस ईमेल से पहले से खाता है। इसके बजाय लॉग इन करें।",
   "auth.err.handle_taken": "यह यूज़रनेम पहले से लिया गया है।",
   "auth.err.signups_disabled": "साइन अप अभी बंद हैं।",
+  "auth.err.captcha_failed": "बॉट-रोधी जाँच विफल रही। कृपया फिर से कोशिश करें।",
   "auth.err.invalid_credentials": "ईमेल या पासवर्ड गलत है।",
   "auth.err.invalid_token": "यह लिंक मान्य नहीं है।",
   "auth.err.expired_token": "यह लिंक समाप्त हो गया है।",

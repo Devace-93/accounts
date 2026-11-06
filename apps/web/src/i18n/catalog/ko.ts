@@ -99,6 +99,7 @@ const ko: PartialCatalog = {
   "auth.err.email_taken": "이 이메일로 된 계정이 이미 있습니다. 로그인하세요.",
   "auth.err.handle_taken": "이미 사용 중인 사용자 이름입니다.",
   "auth.err.signups_disabled": "현재 가입이 닫혀 있습니다.",
+  "auth.err.captcha_failed": "봇 방지 확인에 실패했습니다. 다시 시도해 주세요.",
   "auth.err.invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
   "auth.err.invalid_token": "유효하지 않은 링크입니다.",
   "auth.err.expired_token": "만료된 링크입니다.",
